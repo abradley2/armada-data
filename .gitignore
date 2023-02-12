@@ -1,0 +1,4 @@
+*.bundle.*
+elm-stuff/
+generated/
+node_modules/

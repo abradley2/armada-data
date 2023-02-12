@@ -1,0 +1,13 @@
+{
+    "defenseTokens": {
+        "brace": "Brace",
+        "evade": "Evade",
+        "redirect": "Redirect",
+        "scatter": "Scatter",
+        "salvo": "Salvo"
+    },
+    "shipAttributes": {
+        "hullPoints": "Hull Points",
+        "size": "Size"
+    }
+}

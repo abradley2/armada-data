@@ -1,7 +1,7 @@
 {
     "type": "application",
     "source-directories": [
-        ".",
+        "codegen-src",
         "helpers"
     ],
     "elm-version": "0.19.1",

@@ -53,6 +53,7 @@ run f =
 
 
 {-| Given the flags, decoded from JSON, produce a list of files as output.
+
 -}
 fromJson : Decoder flags -> (flags -> List File) -> Program Json.Value () ()
 fromJson decoder f =

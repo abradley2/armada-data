@@ -5,7 +5,8 @@ import Css
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attrs
 import Html.Styled.Events as Events
-import Theme exposing (theme)
+import ShipCards
+import Theme
 
 
 type alias Model =
@@ -41,7 +42,7 @@ view : Model -> Html Msg
 view _ =
     Html.div
         [ Attrs.css
-            [ Css.backgroundColor theme.softWhite
+            [ Css.backgroundColor Theme.softWhite
             , Css.height (Css.vh 100)
             , Css.width (Css.vw 100)
             ]

@@ -1,11 +1,15 @@
 {
     "type": "application",
     "source-directories": [
-        "src"
+        "src",
+        "generated",
+        "codegen/helpers"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
         "direct": {
+            "ChristophP/elm-i18next": "4.2.1",
+            "abradley2/elm-i18next-gen": "2.0.4",
             "elm/browser": "1.0.2",
             "elm/core": "1.0.5",
             "rtfeldman/elm-css": "18.0.0"
@@ -13,15 +17,31 @@
         "indirect": {
             "elm/html": "1.0.0",
             "elm/json": "1.1.3",
+            "elm/parser": "1.1.0",
+            "elm/regex": "1.0.0",
             "elm/time": "1.0.0",
             "elm/url": "1.0.0",
             "elm/virtual-dom": "1.0.3",
+            "elm-community/basics-extra": "4.1.0",
+            "elm-community/list-extra": "8.7.0",
+            "elm-community/maybe-extra": "5.3.0",
+            "mdgriffith/elm-codegen": "2.0.0",
+            "miniBill/elm-unicode": "1.0.3",
             "robinheghan/murmur3": "1.0.0",
-            "rtfeldman/elm-hex": "1.0.0"
+            "rtfeldman/elm-hex": "1.0.0",
+            "s6o/elm-recase": "1.0.1",
+            "stil4m/elm-syntax": "7.2.9",
+            "stil4m/structured-writer": "1.0.3",
+            "the-sett/elm-pretty-printer": "3.0.0"
         }
     },
     "test-dependencies": {
-        "direct": {},
-        "indirect": {}
+        "direct": {
+            "elm-explorations/test": "2.1.1"
+        },
+        "indirect": {
+            "elm/bytes": "1.0.8",
+            "elm/random": "1.0.0"
+        }
     }
 }

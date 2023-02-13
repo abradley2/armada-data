@@ -8,6 +8,7 @@ import ShipData
         ( Attack
         , AttackProfile
         , DefenseToken(..)
+        , Faction(..)
         , Shield
         , ShipData
         , Size(..)
@@ -21,6 +22,28 @@ type alias ExpressionDecoder t =
     { decoder : Decoder t
     , expression : t -> Expression
     }
+
+
+factionDecoder : ExpressionDecoder Faction
+factionDecoder =
+    let
+        decoder : Decoder Faction
+        decoder =
+            Decode.oneOf
+                [ tokenDecoder "Rebel Alliance" RebelAlliance
+                , tokenDecoder "Galactic Empire" GalacticEmpire
+                ]
+
+        expression : Faction -> Expression
+        expression faction =
+            case faction of
+                RebelAlliance ->
+                    Gen.ShipData.make_.rebelAlliance
+
+                GalacticEmpire ->
+                    Gen.ShipData.make_.galacticEmpire
+    in
+    ExpressionDecoder decoder expression
 
 
 sizeDecoder : ExpressionDecoder Size
@@ -194,9 +217,9 @@ speedChartDecoder =
             Decode.map4
                 SpeedChart
                 (Decode.field "1" (Decode.list yawDecoder.decoder))
-                (maybe << Decode.field "2" <| Decode.list yawDecoder.decoder)
-                (maybe << Decode.field "3" <| Decode.list yawDecoder.decoder)
-                (maybe << Decode.field "4" <| Decode.list yawDecoder.decoder)
+                (Decode.maybe << Decode.field "2" <| Decode.list yawDecoder.decoder)
+                (Decode.maybe << Decode.field "3" <| Decode.list yawDecoder.decoder)
+                (Decode.maybe << Decode.field "4" <| Decode.list yawDecoder.decoder)
 
         expression speedChart =
             Gen.ShipData.make_.speedChart
@@ -283,12 +306,16 @@ upgradeSlotDecoder =
 shipDataDecoder : ExpressionDecoder ShipData
 shipDataDecoder =
     let
+        andMap : Decoder a -> Decoder (a -> b) -> Decoder b
+        andMap d acc =
+            Decode.map2 (\a f -> f a) d acc
+
         decoder : Decoder ShipData
         decoder =
             Decode.succeed ShipData
                 |> andMap (Decode.field "name" Decode.string)
                 |> andMap (Decode.field "size" sizeDecoder.decoder)
-                |> andMap (Decode.field "faction" Decode.string)
+                |> andMap (Decode.field "faction" factionDecoder.decoder)
                 |> andMap (Decode.field "hull" Decode.int)
                 |> andMap (Decode.field "squadron-attack" attackProfileDecoder.decoder)
                 |> andMap (Decode.field "command" Decode.int)
@@ -300,15 +327,15 @@ shipDataDecoder =
                 |> andMap (Decode.field "speed-chart" speedChartDecoder.decoder)
                 |> andMap (Decode.field "slots" (Decode.list upgradeSlotDecoder.decoder))
                 |> andMap (Decode.field "points" Decode.int)
-                |> andMap (maybe <| Decode.field "ship-image" Decode.string)
-                |> andMap (maybe <| Decode.field "image" Decode.string)
+                |> andMap (Decode.maybe <| Decode.field "ship-image" Decode.string)
+                |> andMap (Decode.maybe <| Decode.field "image" Decode.string)
 
         expression : ShipData -> Expression
         expression shipData =
             Gen.ShipData.make_.shipData
                 { name = Elm.string shipData.name
                 , size = sizeDecoder.expression shipData.size
-                , faction = Elm.string shipData.faction
+                , faction = factionDecoder.expression shipData.faction
                 , hull = Elm.int shipData.hull
                 , squadronAttack = attackProfileDecoder.expression shipData.squadronAttack
                 , command = Elm.int shipData.command
@@ -339,16 +366,3 @@ tokenDecoder token rep =
                 else
                     Decode.fail ("Invalid token: " ++ value)
             )
-
-
-andMap : Decoder a -> Decoder (a -> b) -> Decoder b
-andMap decoder acc =
-    Decode.map2 (\a f -> f a) decoder acc
-
-
-maybe : Decoder a -> Decoder (Maybe a)
-maybe decoder =
-    Decode.oneOf
-        [ decoder |> Decode.map Just
-        , Decode.succeed Nothing
-        ]

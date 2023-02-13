@@ -8,6 +8,11 @@ type Size
     | Huge
 
 
+type Faction
+    = GalacticEmpire
+    | RebelAlliance
+
+
 type alias AttackProfile =
     { red : Int
     , blue : Int
@@ -72,7 +77,7 @@ type UpgradeSlot
 type alias ShipData =
     { name : String
     , size : Size
-    , faction : String
+    , faction : Faction
     , hull : Int
     , squadronAttack : AttackProfile
     , command : Int

@@ -1,5 +1,19 @@
 {
     "lang": "en",
+    "greeting": "Welcome aboard, Admiral",
+    "createFleetButton": "Create New Fleet",
+    "selectFleetButton": "Select Existing Fleet",
+    "newFleetForm": {
+        "nameLabel": "Fleet Name",
+        "emptyNameError": "Fleet name cannot be empty",
+        "factionLabel": "Faction",
+        "factionRequiredError": "You must select a faction",
+        "createButtonLabel": "Create"
+    },
+    "factions": {
+        "galacticEmpire": "Galactic Empire",
+        "rebelAlliance": "Rebel Alliance"
+    },
     "defenseTokens": {
         "brace": "Brace",
         "evade": "Evade",

@@ -28,10 +28,6 @@ flagsDecoder =
         ]
 
 
-a =
-    Elm.withType
-
-
 main : Program Value () ()
 main =
     Generate.fromJson

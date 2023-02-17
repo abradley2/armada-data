@@ -42,6 +42,7 @@ type Msg
     | CreateFleetClicked
     | CreateFleetFormSubmitted NewFleetForm.ValidModel
     | NewFleetFormMsg NewFleetForm.Msg
+    | FleetBuilderMsg FleetBuilder.Msg
 
 
 init : ( Model, Eff )
@@ -56,6 +57,18 @@ init =
 update : Msg -> Model -> ( Model, Eff )
 update msg model =
     case msg of
+        FleetBuilderMsg subMsg ->
+            case model.form of
+                Just (FleetBuilder form) ->
+                    let
+                        nextForm =
+                            FleetBuilder.update subMsg form
+                    in
+                    ( { model | form = Just (FleetBuilder nextForm) }, EffNone )
+
+                _ ->
+                    ( model, EffNone )
+
         NewFleetFormMsg subMsg ->
             case model.form of
                 Just (NewFleetForm form) ->
@@ -122,8 +135,9 @@ view model =
                 NewFleetForm.view model.language form
                     |> Html.map NewFleetFormMsg
 
-            Just (FleetBuilder _) ->
-                Html.text "Fleet Builder Form"
+            Just (FleetBuilder fleetBuilder) ->
+                FleetBuilder.view fleetBuilder
+                    |> Html.map FleetBuilderMsg
 
             Nothing ->
                 Html.div

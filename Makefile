@@ -1,6 +1,7 @@
 build: codegen/codegen-src/Gen
 	npx @abradley2/elm-codegen run --flags-from="public/translations.en.json"
-	npx @abradley2/elm-codegen run --flags-from="star-wars-armada-data/data/ship-card.json"
+	npx @abradley2/elm-codegen run --flags-from="star-wars-armada-data/ship-cards.json"
+	npx @abradley2/elm-codegen run --flags-from="star-wars-armada-data/upgrade-cards.json"
 	elm make src/Main.elm --debug --output=public/main.bundle.js
 
 clean:

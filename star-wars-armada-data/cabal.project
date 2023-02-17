@@ -1,0 +1,2 @@
+packages: star-wars-armada-data.cabal
+with-compiler: ghc-9.2.5

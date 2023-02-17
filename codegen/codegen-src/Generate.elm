@@ -4,7 +4,6 @@ module Generate exposing (main)
 
 import Elm
 import Gen.CodeGen.Generate as Generate
-import Gen.ShipData as ShipData
 import GenerateShipData
 import I18NextGen
 import Json.Decode as Decode exposing (Decoder, Value)
@@ -19,7 +18,7 @@ type Flags
 flagsDecoder : Decoder Flags
 flagsDecoder =
     Decode.oneOf
-        [ Decode.field "ships" (Decode.list GenerateShipData.shipDataDecoder.decoder)
+        [ Decode.field "ships" (Decode.list ShipData.shipDataDecoder)
             |> Decode.map Ships
         , Decode.map2
             (\_ translations -> Translations translations)
@@ -43,7 +42,7 @@ main =
                             "allShips"
                             (Elm.list
                                 (List.map
-                                    GenerateShipData.shipDataDecoder.expression
+                                    GenerateShipData.makeShipData
                                     ships
                                 )
                             )

@@ -18,351 +18,173 @@ import ShipData
         )
 
 
-type alias ExpressionDecoder t =
-    { decoder : Decoder t
-    , expression : t -> Expression
-    }
+makeFaction : Faction -> Expression
+makeFaction faction =
+    case faction of
+        RebelAlliance ->
+            Gen.ShipData.make_.rebelAlliance
+
+        GalacticEmpire ->
+            Gen.ShipData.make_.galacticEmpire
 
 
-factionDecoder : ExpressionDecoder Faction
-factionDecoder =
-    let
-        decoder : Decoder Faction
-        decoder =
-            Decode.oneOf
-                [ tokenDecoder "Rebel Alliance" RebelAlliance
-                , tokenDecoder "Galactic Empire" GalacticEmpire
-                ]
+makeShipSize : Size -> Expression
+makeShipSize shipSize =
+    case shipSize of
+        ShipData.Small ->
+            Gen.ShipData.make_.small
 
-        expression : Faction -> Expression
-        expression faction =
-            case faction of
-                RebelAlliance ->
-                    Gen.ShipData.make_.rebelAlliance
+        ShipData.Medium ->
+            Gen.ShipData.make_.medium
 
-                GalacticEmpire ->
-                    Gen.ShipData.make_.galacticEmpire
-    in
-    ExpressionDecoder decoder expression
+        ShipData.Large ->
+            Gen.ShipData.make_.large
+
+        ShipData.Huge ->
+            Gen.ShipData.make_.huge
 
 
-sizeDecoder : ExpressionDecoder Size
-sizeDecoder =
-    let
-        decoder : Decoder Size
-        decoder =
-            Decode.oneOf
-                [ tokenDecoder "small" Small
-                , tokenDecoder "medium" Medium
-                , tokenDecoder "large" Large
-                , tokenDecoder "huge" Huge
-                ]
-
-        expression : Size -> Expression
-        expression shipSize =
-            case shipSize of
-                ShipData.Small ->
-                    Gen.ShipData.make_.small
-
-                ShipData.Medium ->
-                    Gen.ShipData.make_.medium
-
-                ShipData.Large ->
-                    Gen.ShipData.make_.large
-
-                ShipData.Huge ->
-                    Gen.ShipData.make_.huge
-    in
-    ExpressionDecoder decoder expression
+makeAttackProfile : AttackProfile -> Expression
+makeAttackProfile attackProfile =
+    Gen.ShipData.make_.attackProfile
+        { red = Elm.int attackProfile.red
+        , blue = Elm.int attackProfile.blue
+        , black = Elm.int attackProfile.black
+        }
 
 
-attackProfileDecoder : ExpressionDecoder AttackProfile
-attackProfileDecoder =
-    let
-        decoder : Decoder AttackProfile
-        decoder =
-            Decode.map3 AttackProfile
-                (Decode.field "0" Decode.int)
-                (Decode.field "1" Decode.int)
-                (Decode.field "2" Decode.int)
-
-        expression : AttackProfile -> Expression
-        expression attackProfile =
-            Gen.ShipData.make_.attackProfile
-                { red = Elm.int attackProfile.red
-                , blue = Elm.int attackProfile.blue
-                , black = Elm.int attackProfile.black
-                }
-    in
-    ExpressionDecoder decoder expression
+makeAttack : Attack -> Expression
+makeAttack attack =
+    Gen.ShipData.make_.attack
+        { front = makeAttackProfile attack.front
+        , right = makeAttackProfile attack.right
+        , left = makeAttackProfile attack.left
+        , rear = makeAttackProfile attack.rear
+        }
 
 
-attackDecoder : ExpressionDecoder Attack
-attackDecoder =
-    let
-        value : Decoder Attack
-        value =
-            Decode.map4
-                Attack
-                (Decode.field "front" attackProfileDecoder.decoder)
-                (Decode.field "right" attackProfileDecoder.decoder)
-                (Decode.field "left" attackProfileDecoder.decoder)
-                (Decode.field "rear" attackProfileDecoder.decoder)
-
-        expression : Attack -> Expression
-        expression attack =
-            Gen.ShipData.make_.attack
-                { front = attackProfileDecoder.expression attack.front
-                , right = attackProfileDecoder.expression attack.right
-                , left = attackProfileDecoder.expression attack.left
-                , rear = attackProfileDecoder.expression attack.rear
-                }
-    in
-    ExpressionDecoder value expression
+makeShield : Shield -> Expression
+makeShield shield =
+    Gen.ShipData.make_.shield
+        { front = Elm.int shield.front
+        , right = Elm.int shield.right
+        , left = Elm.int shield.left
+        , rear = Elm.int shield.rear
+        }
 
 
-shieldDecoder : ExpressionDecoder Shield
-shieldDecoder =
-    let
-        decoder : Decoder Shield
-        decoder =
-            Decode.map4
-                Shield
-                (Decode.field "front" Decode.int)
-                (Decode.field "right" Decode.int)
-                (Decode.field "left" Decode.int)
-                (Decode.field "rear" Decode.int)
+makeDefenseToken : DefenseToken -> Expression
+makeDefenseToken defenseToken =
+    case defenseToken of
+        Evade ->
+            Gen.ShipData.make_.evade
 
-        expression : Shield -> Expression
-        expression shield =
-            Gen.ShipData.make_.shield
-                { front = Elm.int shield.front
-                , right = Elm.int shield.right
-                , left = Elm.int shield.left
-                , rear = Elm.int shield.rear
-                }
-    in
-    ExpressionDecoder decoder expression
+        Redirect ->
+            Gen.ShipData.make_.redirect
+
+        Contain ->
+            Gen.ShipData.make_.contain
+
+        Brace ->
+            Gen.ShipData.make_.brace
+
+        Scatter ->
+            Gen.ShipData.make_.scatter
+
+        Salvo ->
+            Gen.ShipData.make_.salvo
 
 
-defenseTokenDecoder : ExpressionDecoder DefenseToken
-defenseTokenDecoder =
-    let
-        decoder : Decoder DefenseToken
-        decoder =
-            Decode.oneOf
-                [ tokenDecoder "Evade" Evade
-                , tokenDecoder "Redirect" Redirect
-                , tokenDecoder "Contain" Contain
-                , tokenDecoder "Brace" Brace
-                , tokenDecoder "Scatter" Scatter
-                , tokenDecoder "Salvo" Salvo
-                ]
+makeYaw : Yaw -> Expression
+makeYaw yaw =
+    case yaw of
+        YawZero ->
+            Gen.ShipData.make_.yawZero
 
-        expression : DefenseToken -> Expression
-        expression defenseToken =
-            case defenseToken of
-                Evade ->
-                    Gen.ShipData.make_.evade
+        YawOne ->
+            Gen.ShipData.make_.yawOne
 
-                Redirect ->
-                    Gen.ShipData.make_.redirect
-
-                Contain ->
-                    Gen.ShipData.make_.contain
-
-                Brace ->
-                    Gen.ShipData.make_.brace
-
-                Scatter ->
-                    Gen.ShipData.make_.scatter
-
-                Salvo ->
-                    Gen.ShipData.make_.salvo
-    in
-    ExpressionDecoder decoder expression
+        YawTwo ->
+            Gen.ShipData.make_.yawTwo
 
 
-yawDecoder : ExpressionDecoder Yaw
-yawDecoder =
-    let
-        decoder : Decoder Yaw
-        decoder =
-            Decode.oneOf
-                [ tokenDecoder "-" YawZero
-                , tokenDecoder "|" YawOne
-                , tokenDecoder "||" YawTwo
-                ]
-
-        expression : Yaw -> Expression
-        expression yaw =
-            case yaw of
-                YawZero ->
-                    Gen.ShipData.make_.yawZero
-
-                YawOne ->
-                    Gen.ShipData.make_.yawOne
-
-                YawTwo ->
-                    Gen.ShipData.make_.yawTwo
-    in
-    ExpressionDecoder decoder expression
+makeSpeedChart : SpeedChart -> Expression
+makeSpeedChart speedChart =
+    Gen.ShipData.make_.speedChart
+        { one = Elm.list <| List.map makeYaw speedChart.one
+        , two =
+            Elm.maybe <|
+                Maybe.map (Elm.list << List.map makeYaw)
+                    speedChart.two
+        , three =
+            Elm.maybe <|
+                Maybe.map (Elm.list << List.map makeYaw)
+                    speedChart.three
+        , four =
+            Elm.maybe <|
+                Maybe.map (Elm.list << List.map makeYaw)
+                    speedChart.four
+        }
 
 
-speedChartDecoder : ExpressionDecoder SpeedChart
-speedChartDecoder =
-    let
-        decoder : Decoder SpeedChart
-        decoder =
-            Decode.map4
-                SpeedChart
-                (Decode.field "1" (Decode.list yawDecoder.decoder))
-                (Decode.maybe << Decode.field "2" <| Decode.list yawDecoder.decoder)
-                (Decode.maybe << Decode.field "3" <| Decode.list yawDecoder.decoder)
-                (Decode.maybe << Decode.field "4" <| Decode.list yawDecoder.decoder)
+makeUpgradeSlot : UpgradeSlot -> Expression
+makeUpgradeSlot upgradeSlot =
+    case upgradeSlot of
+        Officer ->
+            Gen.ShipData.make_.officer
 
-        expression speedChart =
-            Gen.ShipData.make_.speedChart
-                { one = Elm.list <| List.map yawDecoder.expression speedChart.one
-                , two =
-                    Elm.maybe <|
-                        Maybe.map (Elm.list << List.map yawDecoder.expression)
-                            speedChart.two
-                , three =
-                    Elm.maybe <|
-                        Maybe.map (Elm.list << List.map yawDecoder.expression)
-                            speedChart.three
-                , four =
-                    Elm.maybe <|
-                        Maybe.map (Elm.list << List.map yawDecoder.expression)
-                            speedChart.four
-                }
-    in
-    ExpressionDecoder decoder expression
+        SupportTeam ->
+            Gen.ShipData.make_.supportTeam
 
+        DefensiveRetrofit ->
+            Gen.ShipData.make_.defensiveRetrofit
 
-upgradeSlotDecoder : ExpressionDecoder UpgradeSlot
-upgradeSlotDecoder =
-    let
-        decoder : Decoder UpgradeSlot
-        decoder =
-            Decode.oneOf
-                [ tokenDecoder "Officer" Officer
-                , tokenDecoder "Support Team" SupportTeam
-                , tokenDecoder "Defensive Retrofit" DefensiveRetrofit
-                , tokenDecoder "Turbolasers" Turbolasers
-                , tokenDecoder "Weapons Team" WeaponsTeam
-                , tokenDecoder "Ordnance" Ordnance
-                , tokenDecoder "Fleet Command" FleetCommand
-                , tokenDecoder "Offensive Retrofit" OffensiveRetrofit
-                , tokenDecoder "Ion Cannons" IonCannons
-                , tokenDecoder "Fleet Support" FleetSupport
-                , tokenDecoder "Experimental Retrofit" ExperimentalRetrofit
-                , tokenDecoder "Superweapon" Superweapon
-                ]
+        Turbolasers ->
+            Gen.ShipData.make_.turbolasers
 
-        expression : UpgradeSlot -> Expression
-        expression upgradeSlot =
-            case upgradeSlot of
-                Officer ->
-                    Gen.ShipData.make_.officer
+        WeaponsTeam ->
+            Gen.ShipData.make_.weaponsTeam
 
-                SupportTeam ->
-                    Gen.ShipData.make_.supportTeam
+        Ordnance ->
+            Gen.ShipData.make_.ordnance
 
-                DefensiveRetrofit ->
-                    Gen.ShipData.make_.defensiveRetrofit
+        FleetCommand ->
+            Gen.ShipData.make_.fleetCommand
 
-                Turbolasers ->
-                    Gen.ShipData.make_.turbolasers
+        OffensiveRetrofit ->
+            Gen.ShipData.make_.offensiveRetrofit
 
-                WeaponsTeam ->
-                    Gen.ShipData.make_.weaponsTeam
+        IonCannons ->
+            Gen.ShipData.make_.ionCannons
 
-                Ordnance ->
-                    Gen.ShipData.make_.ordnance
+        FleetSupport ->
+            Gen.ShipData.make_.fleetSupport
 
-                FleetCommand ->
-                    Gen.ShipData.make_.fleetCommand
+        ExperimentalRetrofit ->
+            Gen.ShipData.make_.experimentalRetrofit
 
-                OffensiveRetrofit ->
-                    Gen.ShipData.make_.offensiveRetrofit
-
-                IonCannons ->
-                    Gen.ShipData.make_.ionCannons
-
-                FleetSupport ->
-                    Gen.ShipData.make_.fleetSupport
-
-                ExperimentalRetrofit ->
-                    Gen.ShipData.make_.experimentalRetrofit
-
-                Superweapon ->
-                    Gen.ShipData.make_.superweapon
-    in
-    ExpressionDecoder decoder expression
+        Superweapon ->
+            Gen.ShipData.make_.superweapon
 
 
-shipDataDecoder : ExpressionDecoder ShipData
-shipDataDecoder =
-    let
-        andMap : Decoder a -> Decoder (a -> b) -> Decoder b
-        andMap d acc =
-            Decode.map2 (\a f -> f a) d acc
-
-        decoder : Decoder ShipData
-        decoder =
-            Decode.succeed ShipData
-                |> andMap (Decode.field "name" Decode.string)
-                |> andMap (Decode.field "size" sizeDecoder.decoder)
-                |> andMap (Decode.field "faction" factionDecoder.decoder)
-                |> andMap (Decode.field "hull" Decode.int)
-                |> andMap (Decode.field "squadron-attack" attackProfileDecoder.decoder)
-                |> andMap (Decode.field "command" Decode.int)
-                |> andMap (Decode.field "squadron" Decode.int)
-                |> andMap (Decode.field "engineering" Decode.int)
-                |> andMap (Decode.field "attack" attackDecoder.decoder)
-                |> andMap (Decode.field "shield" shieldDecoder.decoder)
-                |> andMap (Decode.field "defense-tokens" (Decode.list defenseTokenDecoder.decoder))
-                |> andMap (Decode.field "speed-chart" speedChartDecoder.decoder)
-                |> andMap (Decode.field "slots" (Decode.list upgradeSlotDecoder.decoder))
-                |> andMap (Decode.field "points" Decode.int)
-                |> andMap (Decode.maybe <| Decode.field "ship-image" Decode.string)
-                |> andMap (Decode.maybe <| Decode.field "image" Decode.string)
-
-        expression : ShipData -> Expression
-        expression shipData =
-            Gen.ShipData.make_.shipData
-                { name = Elm.string shipData.name
-                , size = sizeDecoder.expression shipData.size
-                , faction = factionDecoder.expression shipData.faction
-                , hull = Elm.int shipData.hull
-                , squadronAttack = attackProfileDecoder.expression shipData.squadronAttack
-                , command = Elm.int shipData.command
-                , squadron = Elm.int shipData.squadron
-                , engineering = Elm.int shipData.engineering
-                , attack = attackDecoder.expression shipData.attack
-                , shield = shieldDecoder.expression shipData.shield
-                , defenseTokens =
-                    Elm.list <| List.map defenseTokenDecoder.expression shipData.defenseTokens
-                , speedChart = speedChartDecoder.expression shipData.speedChart
-                , slots = Elm.list <| List.map upgradeSlotDecoder.expression shipData.slots
-                , points = Elm.int shipData.points
-                , shipImage = Elm.maybe <| Maybe.map Elm.string shipData.shipImage
-                , image = Elm.maybe <| Maybe.map Elm.string shipData.image
-                }
-    in
-    ExpressionDecoder decoder expression
-
-
-tokenDecoder : String -> a -> Decoder a
-tokenDecoder token rep =
-    Decode.string
-        |> Decode.andThen
-            (\value ->
-                if value == token then
-                    Decode.succeed rep
-
-                else
-                    Decode.fail ("Invalid token: " ++ value)
-            )
+makeShipData : ShipData -> Expression
+makeShipData shipData =
+    Gen.ShipData.make_.shipData
+        { name = Elm.string shipData.name
+        , size = makeShipSize shipData.size
+        , faction = makeFaction shipData.faction
+        , hull = Elm.int shipData.hull
+        , squadronAttack = makeAttackProfile shipData.squadronAttack
+        , command = Elm.int shipData.command
+        , squadron = Elm.int shipData.squadron
+        , engineering = Elm.int shipData.engineering
+        , attack = makeAttack shipData.attack
+        , shield = makeShield shipData.shield
+        , defenseTokens =
+            Elm.list <| List.map makeDefenseToken shipData.defenseTokens
+        , speedChart = makeSpeedChart shipData.speedChart
+        , slots = Elm.list <| List.map makeUpgradeSlot shipData.slots
+        , points = Elm.int shipData.points
+        , shipImage = Elm.maybe <| Maybe.map Elm.string shipData.shipImage
+        , image = Elm.maybe <| Maybe.map Elm.string shipData.image
+        }

@@ -1,7 +1,7 @@
-module Gen.ShipData exposing (annotation_, caseOf_, make_, moduleName_)
+module Gen.ShipData exposing (annotation_, attackDecoder, attackProfileDecoder, call_, caseOf_, defenseTokenDecoder, factionDecoder, make_, moduleName_, shieldDecoder, shipDataDecoder, sizeDecoder, speedChartDecoder, tokenDecoder, upgradeSlotDecoder, values_, yawDecoder)
 
 {-| 
-@docs caseOf_, make_, annotation_, moduleName_
+@docs values_, call_, caseOf_, make_, annotation_, sizeDecoder, factionDecoder, attackProfileDecoder, attackDecoder, shieldDecoder, defenseTokenDecoder, yawDecoder, speedChartDecoder, upgradeSlotDecoder, shipDataDecoder, tokenDecoder, moduleName_
 -}
 
 
@@ -15,6 +15,157 @@ import Tuple
 moduleName_ : List String
 moduleName_ =
     [ "ShipData" ]
+
+
+{-| tokenDecoder: String -> a -> Decoder a -}
+tokenDecoder : String -> Elm.Expression -> Elm.Expression
+tokenDecoder tokenDecoderArg tokenDecoderArg0 =
+    Elm.apply
+        (Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "tokenDecoder"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.string, Type.var "a" ]
+                        (Type.namedWith [] "Decoder" [ Type.var "a" ])
+                    )
+            }
+        )
+        [ Elm.string tokenDecoderArg, tokenDecoderArg0 ]
+
+
+{-| shipDataDecoder: Decoder ShipData -}
+shipDataDecoder : Elm.Expression
+shipDataDecoder =
+    Elm.value
+        { importFrom = [ "ShipData" ]
+        , name = "shipDataDecoder"
+        , annotation =
+            Just
+                (Type.namedWith [] "Decoder" [ Type.namedWith [] "ShipData" [] ]
+                )
+        }
+
+
+{-| upgradeSlotDecoder: Decoder UpgradeSlot -}
+upgradeSlotDecoder : Elm.Expression
+upgradeSlotDecoder =
+    Elm.value
+        { importFrom = [ "ShipData" ]
+        , name = "upgradeSlotDecoder"
+        , annotation =
+            Just
+                (Type.namedWith
+                    []
+                    "Decoder"
+                    [ Type.namedWith [] "UpgradeSlot" [] ]
+                )
+        }
+
+
+{-| speedChartDecoder: Decoder SpeedChart -}
+speedChartDecoder : Elm.Expression
+speedChartDecoder =
+    Elm.value
+        { importFrom = [ "ShipData" ]
+        , name = "speedChartDecoder"
+        , annotation =
+            Just
+                (Type.namedWith
+                    []
+                    "Decoder"
+                    [ Type.namedWith [] "SpeedChart" [] ]
+                )
+        }
+
+
+{-| yawDecoder: Decoder Yaw -}
+yawDecoder : Elm.Expression
+yawDecoder =
+    Elm.value
+        { importFrom = [ "ShipData" ]
+        , name = "yawDecoder"
+        , annotation =
+            Just (Type.namedWith [] "Decoder" [ Type.namedWith [] "Yaw" [] ])
+        }
+
+
+{-| defenseTokenDecoder: Decoder DefenseToken -}
+defenseTokenDecoder : Elm.Expression
+defenseTokenDecoder =
+    Elm.value
+        { importFrom = [ "ShipData" ]
+        , name = "defenseTokenDecoder"
+        , annotation =
+            Just
+                (Type.namedWith
+                    []
+                    "Decoder"
+                    [ Type.namedWith [] "DefenseToken" [] ]
+                )
+        }
+
+
+{-| shieldDecoder: Decoder Shield -}
+shieldDecoder : Elm.Expression
+shieldDecoder =
+    Elm.value
+        { importFrom = [ "ShipData" ]
+        , name = "shieldDecoder"
+        , annotation =
+            Just (Type.namedWith [] "Decoder" [ Type.namedWith [] "Shield" [] ])
+        }
+
+
+{-| attackDecoder: Decoder Attack -}
+attackDecoder : Elm.Expression
+attackDecoder =
+    Elm.value
+        { importFrom = [ "ShipData" ]
+        , name = "attackDecoder"
+        , annotation =
+            Just (Type.namedWith [] "Decoder" [ Type.namedWith [] "Attack" [] ])
+        }
+
+
+{-| attackProfileDecoder: Decoder AttackProfile -}
+attackProfileDecoder : Elm.Expression
+attackProfileDecoder =
+    Elm.value
+        { importFrom = [ "ShipData" ]
+        , name = "attackProfileDecoder"
+        , annotation =
+            Just
+                (Type.namedWith
+                    []
+                    "Decoder"
+                    [ Type.namedWith [] "AttackProfile" [] ]
+                )
+        }
+
+
+{-| factionDecoder: Decoder Faction -}
+factionDecoder : Elm.Expression
+factionDecoder =
+    Elm.value
+        { importFrom = [ "ShipData" ]
+        , name = "factionDecoder"
+        , annotation =
+            Just
+                (Type.namedWith [] "Decoder" [ Type.namedWith [] "Faction" [] ])
+        }
+
+
+{-| sizeDecoder: Decoder Size -}
+sizeDecoder : Elm.Expression
+sizeDecoder =
+    Elm.value
+        { importFrom = [ "ShipData" ]
+        , name = "sizeDecoder"
+        , annotation =
+            Just (Type.namedWith [] "Decoder" [ Type.namedWith [] "Size" [] ])
+        }
 
 
 annotation_ :
@@ -637,6 +788,167 @@ caseOf_ =
                 , Elm.Case.branch0 "Large" sizeTags.large
                 , Elm.Case.branch0 "Huge" sizeTags.huge
                 ]
+    }
+
+
+call_ : { tokenDecoder : Elm.Expression -> Elm.Expression -> Elm.Expression }
+call_ =
+    { tokenDecoder =
+        \tokenDecoderArg tokenDecoderArg0 ->
+            Elm.apply
+                (Elm.value
+                    { importFrom = [ "ShipData" ]
+                    , name = "tokenDecoder"
+                    , annotation =
+                        Just
+                            (Type.function
+                                [ Type.string, Type.var "a" ]
+                                (Type.namedWith [] "Decoder" [ Type.var "a" ])
+                            )
+                    }
+                )
+                [ tokenDecoderArg, tokenDecoderArg0 ]
+    }
+
+
+values_ :
+    { tokenDecoder : Elm.Expression
+    , shipDataDecoder : Elm.Expression
+    , upgradeSlotDecoder : Elm.Expression
+    , speedChartDecoder : Elm.Expression
+    , yawDecoder : Elm.Expression
+    , defenseTokenDecoder : Elm.Expression
+    , shieldDecoder : Elm.Expression
+    , attackDecoder : Elm.Expression
+    , attackProfileDecoder : Elm.Expression
+    , factionDecoder : Elm.Expression
+    , sizeDecoder : Elm.Expression
+    }
+values_ =
+    { tokenDecoder =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "tokenDecoder"
+            , annotation =
+                Just
+                    (Type.function
+                        [ Type.string, Type.var "a" ]
+                        (Type.namedWith [] "Decoder" [ Type.var "a" ])
+                    )
+            }
+    , shipDataDecoder =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "shipDataDecoder"
+            , annotation =
+                Just
+                    (Type.namedWith
+                        []
+                        "Decoder"
+                        [ Type.namedWith [] "ShipData" [] ]
+                    )
+            }
+    , upgradeSlotDecoder =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "upgradeSlotDecoder"
+            , annotation =
+                Just
+                    (Type.namedWith
+                        []
+                        "Decoder"
+                        [ Type.namedWith [] "UpgradeSlot" [] ]
+                    )
+            }
+    , speedChartDecoder =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "speedChartDecoder"
+            , annotation =
+                Just
+                    (Type.namedWith
+                        []
+                        "Decoder"
+                        [ Type.namedWith [] "SpeedChart" [] ]
+                    )
+            }
+    , yawDecoder =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "yawDecoder"
+            , annotation =
+                Just
+                    (Type.namedWith [] "Decoder" [ Type.namedWith [] "Yaw" [] ])
+            }
+    , defenseTokenDecoder =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "defenseTokenDecoder"
+            , annotation =
+                Just
+                    (Type.namedWith
+                        []
+                        "Decoder"
+                        [ Type.namedWith [] "DefenseToken" [] ]
+                    )
+            }
+    , shieldDecoder =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "shieldDecoder"
+            , annotation =
+                Just
+                    (Type.namedWith
+                        []
+                        "Decoder"
+                        [ Type.namedWith [] "Shield" [] ]
+                    )
+            }
+    , attackDecoder =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "attackDecoder"
+            , annotation =
+                Just
+                    (Type.namedWith
+                        []
+                        "Decoder"
+                        [ Type.namedWith [] "Attack" [] ]
+                    )
+            }
+    , attackProfileDecoder =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "attackProfileDecoder"
+            , annotation =
+                Just
+                    (Type.namedWith
+                        []
+                        "Decoder"
+                        [ Type.namedWith [] "AttackProfile" [] ]
+                    )
+            }
+    , factionDecoder =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "factionDecoder"
+            , annotation =
+                Just
+                    (Type.namedWith
+                        []
+                        "Decoder"
+                        [ Type.namedWith [] "Faction" [] ]
+                    )
+            }
+    , sizeDecoder =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "sizeDecoder"
+            , annotation =
+                Just
+                    (Type.namedWith [] "Decoder" [ Type.namedWith [] "Size" [] ]
+                    )
+            }
     }
 
 

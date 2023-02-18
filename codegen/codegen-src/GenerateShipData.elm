@@ -2,7 +2,6 @@ module GenerateShipData exposing (..)
 
 import Elm exposing (Expression)
 import Gen.ShipData
-import Json.Decode as Decode exposing (Decoder)
 import ShipData
     exposing
         ( Attack
@@ -165,6 +164,12 @@ makeUpgradeSlot upgradeSlot =
 
         Superweapon ->
             Gen.ShipData.make_.superweapon
+
+        Commander ->
+            Gen.ShipData.make_.commander
+
+        Title ->
+            Gen.ShipData.make_.title
 
 
 makeShipData : ShipData -> Expression

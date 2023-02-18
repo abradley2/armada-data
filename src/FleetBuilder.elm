@@ -1,17 +1,35 @@
 module FleetBuilder exposing (..)
 
+import Css
+import Css.Global
+import Dict exposing (Dict)
 import Html.Styled as Html exposing (Html)
+import Html.Styled.Attributes as Attrs
 import Html.Styled.Events as Events
 import Html.Styled.Lazy as LazyHtml
 import ShipCards
-import ShipData exposing (Faction, ShipData)
+import ShipData exposing (Faction, ShipData, UpgradeSlot)
+import Theme
 
 
 type alias Model =
     { name : String
     , faction : Faction
-    , ships : List ShipData
+    , ships : List SelectedShip
     , mode : Mode
+    }
+
+
+type alias SelectedShip =
+    { shipData : ShipData
+    , upgrades : List ( UpgradeSlot, Maybe () )
+    }
+
+
+selectShip : ShipData -> SelectedShip
+selectShip shipData =
+    { shipData = shipData
+    , upgrades = List.map (Tuple.pair >> (|>) (Just ())) shipData.slots
     }
 
 
@@ -22,6 +40,7 @@ type Mode
 
 type Msg
     = AddShipClicked
+    | ShipSelected ShipData
 
 
 init : String -> Faction -> Model
@@ -39,6 +58,12 @@ update msg model =
         AddShipClicked ->
             { model | mode = SelectShips }
 
+        ShipSelected shipData ->
+            { model
+                | ships = List.concat [ model.ships, [ selectShip shipData ] ]
+                , mode = ViewFleet
+            }
+
 
 view : Model -> Html Msg
 view model =
@@ -51,11 +76,15 @@ view model =
 
 
 fleetView : Model -> Html Msg
-fleetView _ =
-    Html.button
-        [ Events.onClick AddShipClicked
-        ]
-        [ Html.text "Add Ship"
+fleetView model =
+    Html.div
+        []
+        [ Html.button
+            [ Events.onClick AddShipClicked
+            ]
+            [ Html.text "Add Ship"
+            ]
+        , selectedShipsView model.ships
         ]
 
 
@@ -83,4 +112,48 @@ shipSelectView_ faction =
 
 selectableShipView : ShipData -> Html Msg
 selectableShipView ship =
-    Html.text ship.name
+    Html.button
+        [ Events.onClick <| ShipSelected ship
+        ]
+        [ Html.text ship.name
+        ]
+
+
+selectedShipsView : List SelectedShip -> Html Msg
+selectedShipsView =
+    LazyHtml.lazy selectedShipsView_
+
+
+selectedShipsView_ : List SelectedShip -> Html Msg
+selectedShipsView_ ships =
+    let
+        className =
+            "selected-ships"
+    in
+    Html.div
+        [ Attrs.class className
+        ]
+    <|
+        Css.Global.global
+            [ Css.Global.class className
+                [ Css.Global.descendants
+                    [ Css.Global.div
+                        [ Css.fontSize (Css.rem 2)
+                        ]
+                    ]
+                ]
+            ]
+            :: List.map selectedShipView ships
+
+
+selectedShipView : SelectedShip -> Html Msg
+selectedShipView =
+    LazyHtml.lazy selectedShipView_
+
+
+selectedShipView_ : SelectedShip -> Html Msg
+selectedShipView_ ship =
+    Html.div
+        []
+        [ Html.text ship.shipData.name
+        ]

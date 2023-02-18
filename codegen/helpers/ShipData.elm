@@ -151,6 +151,8 @@ type UpgradeSlot
     | FleetSupport
     | ExperimentalRetrofit
     | Superweapon
+    | Commander
+    | Title
 
 
 upgradeSlotDecoder : Decoder UpgradeSlot
@@ -168,6 +170,8 @@ upgradeSlotDecoder =
         , tokenDecoder "Fleet Support" FleetSupport
         , tokenDecoder "Experimental Retrofit" ExperimentalRetrofit
         , tokenDecoder "Superweapon" Superweapon
+        , tokenDecoder "Commander" Commander
+        , tokenDecoder "Title" Title
         ]
 
 

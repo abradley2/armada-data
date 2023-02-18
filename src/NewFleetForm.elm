@@ -158,7 +158,11 @@ view language model =
                             )
                     )
                 ]
-                [ Html.option
+                [ Html.option 
+                    []
+                    [ Html.text "Select a Faction" 
+                    ]
+                , Html.option
                     []
                     [ Html.text <|
                         Translations.galacticEmpire language

@@ -333,6 +333,8 @@ make_ :
     , fleetSupport : Elm.Expression
     , experimentalRetrofit : Elm.Expression
     , superweapon : Elm.Expression
+    , commander : Elm.Expression
+    , title : Elm.Expression
     , yawZero : Elm.Expression
     , yawOne : Elm.Expression
     , yawTwo : Elm.Expression
@@ -577,6 +579,18 @@ make_ =
             , name = "Superweapon"
             , annotation = Just (Type.namedWith [] "UpgradeSlot" [])
             }
+    , commander =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "Commander"
+            , annotation = Just (Type.namedWith [] "UpgradeSlot" [])
+            }
+    , title =
+        Elm.value
+            { importFrom = [ "ShipData" ]
+            , name = "Title"
+            , annotation = Just (Type.namedWith [] "UpgradeSlot" [])
+            }
     , yawZero =
         Elm.value
             { importFrom = [ "ShipData" ]
@@ -686,6 +700,8 @@ caseOf_ :
             , fleetSupport : Elm.Expression
             , experimentalRetrofit : Elm.Expression
             , superweapon : Elm.Expression
+            , commander : Elm.Expression
+            , title : Elm.Expression
         }
         -> Elm.Expression
     , yaw :
@@ -748,6 +764,8 @@ caseOf_ =
                     "ExperimentalRetrofit"
                     upgradeSlotTags.experimentalRetrofit
                 , Elm.Case.branch0 "Superweapon" upgradeSlotTags.superweapon
+                , Elm.Case.branch0 "Commander" upgradeSlotTags.commander
+                , Elm.Case.branch0 "Title" upgradeSlotTags.title
                 ]
     , yaw =
         \yawExpression yawTags ->

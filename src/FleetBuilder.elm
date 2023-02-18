@@ -29,7 +29,9 @@ type alias SelectedShip =
 selectShip : ShipData -> SelectedShip
 selectShip shipData =
     { shipData = shipData
-    , upgrades = List.map (Tuple.pair >> (|>) (Just ())) shipData.slots
+    , upgrades =
+        List.map (Tuple.pair >> (|>) (Just ()))
+            (ShipData.Commander :: ShipData.Title :: shipData.slots)
     }
 
 
@@ -126,21 +128,17 @@ selectedShipsView =
 
 selectedShipsView_ : List SelectedShip -> Html Msg
 selectedShipsView_ ships =
-    let
-        className =
-            "selected-ships"
-    in
     Html.div
-        [ Attrs.class className
+        [ Attrs.class "selected-ships"
         ]
     <|
         Css.Global.global
-            [ Css.Global.class className
-                [ Css.Global.descendants
-                    [ Css.Global.div
-                        [ Css.fontSize (Css.rem 2)
-                        ]
-                    ]
+            [ Css.Global.class "selected-ships"
+                [ Css.fontSize (Css.rem 2)
+                ]
+            , Css.Global.class "selected-ships__upgrade-slot-button" 
+                [ Css.fontSize (Css.rem 1)
+
                 ]
             ]
             :: List.map selectedShipView ships
@@ -156,4 +154,61 @@ selectedShipView_ ship =
     Html.div
         []
         [ Html.text ship.shipData.name
+        , Html.div
+            []
+          <|
+            List.map
+                (\upgrade ->
+                    upgradeSlotButton upgrade
+                )
+                ship.upgrades
+        ]
+
+
+upgradeSlotButton : ( UpgradeSlot, Maybe () ) -> Html Msg
+upgradeSlotButton ( slot, upgrade ) =
+    Html.div
+        [ Attrs.class "selected-ships__upgrade-slot-button" ]
+        [ case slot of
+            ShipData.Officer ->
+                Html.text "Officer"
+
+            ShipData.Title ->
+                Html.text "Title"
+
+            ShipData.SupportTeam ->
+                Html.text "Support Team"
+
+            ShipData.OffensiveRetrofit ->
+                Html.text "Offensive Retrofit"
+
+            ShipData.DefensiveRetrofit ->
+                Html.text "Defensive Retrofit"
+
+            ShipData.Turbolasers ->
+                Html.text "Turbolasers"
+
+            ShipData.Ordnance ->
+                Html.text "Ordnance"
+
+            ShipData.FleetCommand ->
+                Html.text "Fleet Command"
+
+            ShipData.WeaponsTeam ->
+                Html.text "Weapons Team"
+
+            ShipData.IonCannons ->
+                Html.text "Ion Cannons"
+
+            ShipData.ExperimentalRetrofit ->
+                Html.text "Experimental Retrofit"
+
+            ShipData.Superweapon ->
+                Html.text "Superweapon"
+
+            ShipData.Commander ->
+                Html.text "Commander"
+
+            ShipData.FleetSupport ->
+                Html.text "Fleet Support"
         ]

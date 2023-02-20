@@ -14,6 +14,9 @@ generated: codegen/codegen-src/Gen
 codegen/codegen-src/Gen:
 	npx @abradley2/elm-codegen install
 
+test:
+	elm-test
+
 review-fix:
 	elm-review src/ --fix
 

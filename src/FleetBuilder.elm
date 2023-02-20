@@ -127,7 +127,7 @@ update msg model =
                         if idx == shipIdx then
                             Maybe.map (unselectUpgrade >> (|>) ship) previousUpgrade
                                 |> Maybe.withDefault ship
-
+                                |> unselectUpgrade upgrade
                                 |> selectUpgrade upgrade
                                 |> Maybe.withDefault ship
 

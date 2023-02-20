@@ -3,3 +3,4 @@ elm-stuff/
 generated/
 node_modules/
 dist-newstyle/
+codegen/codegen-src/Gen/

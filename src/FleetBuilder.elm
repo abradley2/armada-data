@@ -8,6 +8,8 @@ import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attrs
 import Html.Styled.Events as Events
 import Html.Styled.Lazy as LazyHtml
+import List.Extra as ListX
+import Maybe.Extra as MaybeX
 import Set
 import ShipCards
 import ShipData exposing (Faction, ShipData, UpgradeSlot)
@@ -28,6 +30,43 @@ type alias SelectedShip =
     { shipData : ShipData
     , upgrades : List ( UpgradeSlot, Maybe Upgrade )
     }
+
+
+selectUpgrade : Upgrade -> SelectedShip -> Maybe SelectedShip
+selectUpgrade upgrade ship =
+    let
+        applyUpgrade : List UpgradeSlot -> SelectedShip -> Maybe SelectedShip
+        applyUpgrade reqSlots nextShip =
+            case reqSlots of
+                [] ->
+                    Just nextShip
+
+                reqSlot :: next ->
+                    ListX.indexedFoldl
+                        (\idx ( slot, appliedUpgrade ) acc ->
+                            case acc of
+                                Just _ ->
+                                    acc
+
+                                Nothing ->
+                                    if slot == reqSlot && MaybeX.isNothing appliedUpgrade then
+                                        Just <|
+                                            { nextShip
+                                                | upgrades =
+                                                    ListX.updateAt
+                                                        idx
+                                                        (always ( slot, Just upgrade ))
+                                                        nextShip.upgrades
+                                            }
+
+                                    else
+                                        Nothing
+                        )
+                        Nothing
+                        nextShip.upgrades
+                        |> Maybe.andThen (applyUpgrade next)
+    in
+    applyUpgrade upgrade.slots ship
 
 
 selectShip : ShipData -> SelectedShip
@@ -278,7 +317,7 @@ selectableCards_ shipSlots slot =
         (List.filter
             (\upgrade ->
                 List.member slot upgrade.slots
-                    && (Set.toList >> List.length >> ((==) (List.length upgrade.slots)))
+                    && (Set.toList >> List.length >> (==) (List.length upgrade.slots))
                         (Set.intersect
                             (Set.fromList <| List.map ShipData.upgradeSlotToString availableSlots)
                             (Set.fromList <| List.map ShipData.upgradeSlotToString upgrade.slots)

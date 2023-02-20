@@ -32,6 +32,22 @@ type alias SelectedShip =
     }
 
 
+unselectUpgrade : Upgrade -> SelectedShip -> SelectedShip
+unselectUpgrade upgrade ship =
+    { ship
+        | upgrades =
+            List.map
+                (\( slot, appliedUpgrade ) ->
+                    if Maybe.map .name appliedUpgrade == Just upgrade.name then
+                        ( slot, Nothing )
+
+                    else
+                        ( slot, appliedUpgrade )
+                )
+                ship.upgrades
+    }
+
+
 selectUpgrade : Upgrade -> SelectedShip -> Maybe SelectedShip
 selectUpgrade upgrade ship =
     let
@@ -86,7 +102,7 @@ type Mode
 type Msg
     = AddShipClicked
     | ShipSelected ShipData
-    | UpgradeSelected Int Upgrade
+    | UpgradeSelected Int (Maybe Upgrade) Upgrade
 
 
 init : String -> Faction -> Model
@@ -104,12 +120,15 @@ update msg model =
         AddShipClicked ->
             { model | mode = SelectShips }
 
-        UpgradeSelected shipIdx upgrade ->
+        UpgradeSelected shipIdx previousUpgrade upgrade ->
             model.ships
                 |> List.indexedMap
                     (\idx ship ->
                         if idx == shipIdx then
-                            selectUpgrade upgrade ship
+                            Maybe.map (unselectUpgrade >> (|>) ship) previousUpgrade
+                                |> Maybe.withDefault ship
+
+                                |> selectUpgrade upgrade
                                 |> Maybe.withDefault ship
 
                         else
@@ -279,9 +298,9 @@ upgradeSlotButton_ shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
             ShipData.FleetSupport ->
                 Html.text "Fleet Support"
         , selectableCards selectedShipSlots slot
-            |> Html.map (UpgradeSelected shipIdx)
+            |> Html.map (UpgradeSelected shipIdx selectedUpgrade)
         , List.singleton
-            >> Html.b [] 
+            >> Html.b []
             >> List.singleton
             >> Html.div []
           <|

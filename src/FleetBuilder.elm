@@ -184,19 +184,29 @@ selectedShipView_ shipIdx ship =
           <|
             List.indexedMap
                 (\upgradeIdx upgrade ->
-                    upgradeSlotButton shipIdx upgradeIdx ship.shipData.slots upgrade
+                    upgradeSlotButton shipIdx upgradeIdx ship.upgrades upgrade
                 )
                 ship.upgrades
         ]
 
 
-upgradeSlotButton : Int -> Int -> List UpgradeSlot -> ( UpgradeSlot, Maybe Upgrade ) -> Html Msg
+upgradeSlotButton :
+    Int
+    -> Int
+    -> List ( UpgradeSlot, Maybe Upgrade )
+    -> ( UpgradeSlot, Maybe Upgrade )
+    -> Html Msg
 upgradeSlotButton =
     LazyHtml.lazy4 upgradeSlotButton_
 
 
-upgradeSlotButton_ : Int -> Int -> List UpgradeSlot -> ( UpgradeSlot, Maybe Upgrade ) -> Html Msg
-upgradeSlotButton_ shipIdx upgradeIdx slots ( slot, selectedUpgrade ) =
+upgradeSlotButton_ :
+    Int
+    -> Int
+    -> List ( UpgradeSlot, Maybe Upgrade )
+    -> ( UpgradeSlot, Maybe Upgrade )
+    -> Html Msg
+upgradeSlotButton_ shipIdx upgradeIdx selectedShipSlots ( slot, selectedUpgrade ) =
     Html.div
         [ Attrs.class "selected-ships__upgrade-slot-button" ]
         [ case slot of
@@ -241,40 +251,46 @@ upgradeSlotButton_ shipIdx upgradeIdx slots ( slot, selectedUpgrade ) =
 
             ShipData.FleetSupport ->
                 Html.text "Fleet Support"
+        , selectableCards selectedShipSlots slot
+            |> Html.map (Just >> UpgradeSelected shipIdx upgradeIdx)
         ]
+
+
+selectableCards : List ( UpgradeSlot, Maybe Upgrade ) -> UpgradeSlot -> Html Upgrade
+selectableCards =
+    LazyHtml.lazy2 selectableCards_
 
 
 {-| Given a ships upgrade slots, and a slot to select for, return
 a list of upgrades that can be selected for that slot.
 (some upgrades require multiple slots to be filled, hence the need for allSlots)
 -}
-selectableCards : List ( UpgradeSlot, Maybe Upgrade ) -> UpgradeSlot -> List Upgrade
-selectableCards shipSlots slot =
+selectableCards_ : List ( UpgradeSlot, Maybe Upgrade ) -> UpgradeSlot -> Html Upgrade
+selectableCards_ shipSlots slot =
     let
         availableSlots : List UpgradeSlot
         availableSlots =
             shipSlots
-                |> List.filter
-                    (\( _, selectedUpgrade ) ->
-                        case selectedUpgrade of
-                            Just _ ->
-                                False
-
-                            Nothing ->
-                                True
-                    )
                 |> List.map Tuple.first
-
-        a =
-            UpgradeCards.allUpgrades
-                |> List.filter
-                    (\upgrade ->
-                        List.member slot upgrade.slots
-                            && Set.isEmpty
-                                (Set.diff
-                                    (Set.fromList <| List.map ShipData.upgradeSlotToString availableSlots)
-                                    (Set.fromList upgrade.slots)
-                                )
-                    )
     in
-    []
+    Html.select
+        []
+        (List.filter
+            (\upgrade ->
+                List.member slot upgrade.slots
+                    && (Set.toList >> List.length >> ((==) (List.length upgrade.slots)))
+                        (Set.intersect
+                            (Set.fromList <| List.map ShipData.upgradeSlotToString availableSlots)
+                            (Set.fromList <| List.map ShipData.upgradeSlotToString upgrade.slots)
+                        )
+            )
+            UpgradeCards.allUpgrades
+            |> List.map
+                (\upgrade ->
+                    Html.option
+                        [ Events.onClick upgrade
+                        , Attrs.value upgrade.name
+                        ]
+                        [ Html.text <| upgrade.name ]
+                )
+        )

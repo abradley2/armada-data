@@ -155,6 +155,52 @@ type UpgradeSlot
     | Title
 
 
+upgradeSlotToString : UpgradeSlot -> String
+upgradeSlotToString slot =
+    case slot of
+        Officer ->
+            "Officer"
+
+        SupportTeam ->
+            "Support Team"
+
+        DefensiveRetrofit ->
+            "Defensive Retrofit"
+
+        OffensiveRetrofit ->
+            "Offensive Retrofit"
+
+        Turbolasers ->
+            "Turbolasers"
+
+        Ordnance ->
+            "Ordnance"
+
+        FleetCommand ->
+            "Fleet Command"
+
+        WeaponsTeam ->
+            "Weapons Team"
+
+        IonCannons ->
+            "Ion Cannons"
+
+        FleetSupport ->
+            "Fleet Support"
+
+        ExperimentalRetrofit ->
+            "Experimental Retrofit"
+
+        Superweapon ->
+            "Superweapon"
+
+        Commander ->
+            "Commander"
+
+        Title ->
+            "Title"
+
+
 upgradeSlotDecoder : Decoder UpgradeSlot
 upgradeSlotDecoder =
     Decode.oneOf

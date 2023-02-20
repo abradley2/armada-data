@@ -1,5 +1,6 @@
 module FleetBuilder exposing (..)
 
+import Array
 import Css
 import Css.Global
 import Dict exposing (Dict)
@@ -7,9 +8,12 @@ import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attrs
 import Html.Styled.Events as Events
 import Html.Styled.Lazy as LazyHtml
+import Set
 import ShipCards
 import ShipData exposing (Faction, ShipData, UpgradeSlot)
 import Theme
+import UpgradeCards
+import Upgrades exposing (Upgrade)
 
 
 type alias Model =
@@ -22,7 +26,7 @@ type alias Model =
 
 type alias SelectedShip =
     { shipData : ShipData
-    , upgrades : List ( UpgradeSlot, Maybe () )
+    , upgrades : List ( UpgradeSlot, Maybe Upgrade )
     }
 
 
@@ -30,7 +34,7 @@ selectShip : ShipData -> SelectedShip
 selectShip shipData =
     { shipData = shipData
     , upgrades =
-        List.map (Tuple.pair >> (|>) (Just ()))
+        List.map (Tuple.pair >> (|>) Nothing)
             (ShipData.Commander :: ShipData.Title :: shipData.slots)
     }
 
@@ -43,6 +47,7 @@ type Mode
 type Msg
     = AddShipClicked
     | ShipSelected ShipData
+    | UpgradeSelected Int Int (Maybe Upgrade)
 
 
 init : String -> Faction -> Model
@@ -59,6 +64,27 @@ update msg model =
     case msg of
         AddShipClicked ->
             { model | mode = SelectShips }
+
+        UpgradeSelected shipIdx slotIdx upgrade ->
+            model.ships
+                |> List.indexedMap
+                    (\idx ship ->
+                        if idx == shipIdx then
+                            ship.upgrades
+                                |> List.indexedMap
+                                    (\idx_ ( slot, existingUpgrade ) ->
+                                        if idx_ == slotIdx then
+                                            ( slot, upgrade )
+
+                                        else
+                                            ( slot, existingUpgrade )
+                                    )
+                                |> (\upgrades -> { ship | upgrades = upgrades })
+
+                        else
+                            ship
+                    )
+                |> (\ships -> { model | ships = ships })
 
         ShipSelected shipData ->
             { model
@@ -136,37 +162,41 @@ selectedShipsView_ ships =
             [ Css.Global.class "selected-ships"
                 [ Css.fontSize (Css.rem 2)
                 ]
-            , Css.Global.class "selected-ships__upgrade-slot-button" 
+            , Css.Global.class "selected-ships__upgrade-slot-button"
                 [ Css.fontSize (Css.rem 1)
-
                 ]
             ]
-            :: List.map selectedShipView ships
+            :: List.indexedMap selectedShipView ships
 
 
-selectedShipView : SelectedShip -> Html Msg
+selectedShipView : Int -> SelectedShip -> Html Msg
 selectedShipView =
-    LazyHtml.lazy selectedShipView_
+    LazyHtml.lazy2 selectedShipView_
 
 
-selectedShipView_ : SelectedShip -> Html Msg
-selectedShipView_ ship =
+selectedShipView_ : Int -> SelectedShip -> Html Msg
+selectedShipView_ shipIdx ship =
     Html.div
         []
         [ Html.text ship.shipData.name
         , Html.div
             []
           <|
-            List.map
-                (\upgrade ->
-                    upgradeSlotButton upgrade
+            List.indexedMap
+                (\upgradeIdx upgrade ->
+                    upgradeSlotButton shipIdx upgradeIdx ship.shipData.slots upgrade
                 )
                 ship.upgrades
         ]
 
 
-upgradeSlotButton : ( UpgradeSlot, Maybe () ) -> Html Msg
-upgradeSlotButton ( slot, upgrade ) =
+upgradeSlotButton : Int -> Int -> List UpgradeSlot -> ( UpgradeSlot, Maybe Upgrade ) -> Html Msg
+upgradeSlotButton =
+    LazyHtml.lazy4 upgradeSlotButton_
+
+
+upgradeSlotButton_ : Int -> Int -> List UpgradeSlot -> ( UpgradeSlot, Maybe Upgrade ) -> Html Msg
+upgradeSlotButton_ shipIdx upgradeIdx slots ( slot, selectedUpgrade ) =
     Html.div
         [ Attrs.class "selected-ships__upgrade-slot-button" ]
         [ case slot of
@@ -212,3 +242,39 @@ upgradeSlotButton ( slot, upgrade ) =
             ShipData.FleetSupport ->
                 Html.text "Fleet Support"
         ]
+
+
+{-| Given a ships upgrade slots, and a slot to select for, return
+a list of upgrades that can be selected for that slot.
+(some upgrades require multiple slots to be filled, hence the need for allSlots)
+-}
+selectableCards : List ( UpgradeSlot, Maybe Upgrade ) -> UpgradeSlot -> List Upgrade
+selectableCards shipSlots slot =
+    let
+        availableSlots : List UpgradeSlot
+        availableSlots =
+            shipSlots
+                |> List.filter
+                    (\( _, selectedUpgrade ) ->
+                        case selectedUpgrade of
+                            Just _ ->
+                                False
+
+                            Nothing ->
+                                True
+                    )
+                |> List.map Tuple.first
+
+        a =
+            UpgradeCards.allUpgrades
+                |> List.filter
+                    (\upgrade ->
+                        List.member slot upgrade.slots
+                            && Set.isEmpty
+                                (Set.diff
+                                    (Set.fromList <| List.map ShipData.upgradeSlotToString availableSlots)
+                                    (Set.fromList upgrade.slots)
+                                )
+                    )
+    in
+    []

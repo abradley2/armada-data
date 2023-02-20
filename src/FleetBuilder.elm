@@ -280,6 +280,17 @@ upgradeSlotButton_ shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
                 Html.text "Fleet Support"
         , selectableCards selectedShipSlots slot
             |> Html.map (UpgradeSelected shipIdx)
+        , List.singleton
+            >> Html.b [] 
+            >> List.singleton
+            >> Html.div []
+          <|
+            case selectedUpgrade of
+                Just upgrade ->
+                    Html.text upgrade.name
+
+                Nothing ->
+                    Html.text "None"
         ]
 
 

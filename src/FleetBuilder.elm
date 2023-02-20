@@ -86,7 +86,7 @@ type Mode
 type Msg
     = AddShipClicked
     | ShipSelected ShipData
-    | UpgradeSelected Int Int (Maybe Upgrade)
+    | UpgradeSelected Int Upgrade
 
 
 init : String -> Faction -> Model
@@ -104,21 +104,13 @@ update msg model =
         AddShipClicked ->
             { model | mode = SelectShips }
 
-        UpgradeSelected shipIdx slotIdx upgrade ->
+        UpgradeSelected shipIdx upgrade ->
             model.ships
                 |> List.indexedMap
                     (\idx ship ->
                         if idx == shipIdx then
-                            ship.upgrades
-                                |> List.indexedMap
-                                    (\idx_ ( slot, existingUpgrade ) ->
-                                        if idx_ == slotIdx then
-                                            ( slot, upgrade )
-
-                                        else
-                                            ( slot, existingUpgrade )
-                                    )
-                                |> (\upgrades -> { ship | upgrades = upgrades })
+                            selectUpgrade upgrade ship
+                                |> Maybe.withDefault ship
 
                         else
                             ship
@@ -221,31 +213,27 @@ selectedShipView_ shipIdx ship =
         , Html.div
             []
           <|
-            List.indexedMap
-                (\upgradeIdx upgrade ->
-                    upgradeSlotButton shipIdx upgradeIdx ship.upgrades upgrade
-                )
+            List.map
+                (upgradeSlotButton shipIdx ship.upgrades)
                 ship.upgrades
         ]
 
 
 upgradeSlotButton :
     Int
-    -> Int
     -> List ( UpgradeSlot, Maybe Upgrade )
     -> ( UpgradeSlot, Maybe Upgrade )
     -> Html Msg
 upgradeSlotButton =
-    LazyHtml.lazy4 upgradeSlotButton_
+    LazyHtml.lazy3 upgradeSlotButton_
 
 
 upgradeSlotButton_ :
     Int
-    -> Int
     -> List ( UpgradeSlot, Maybe Upgrade )
     -> ( UpgradeSlot, Maybe Upgrade )
     -> Html Msg
-upgradeSlotButton_ shipIdx upgradeIdx selectedShipSlots ( slot, selectedUpgrade ) =
+upgradeSlotButton_ shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
     Html.div
         [ Attrs.class "selected-ships__upgrade-slot-button" ]
         [ case slot of
@@ -291,7 +279,7 @@ upgradeSlotButton_ shipIdx upgradeIdx selectedShipSlots ( slot, selectedUpgrade 
             ShipData.FleetSupport ->
                 Html.text "Fleet Support"
         , selectableCards selectedShipSlots slot
-            |> Html.map (Just >> UpgradeSelected shipIdx upgradeIdx)
+            |> Html.map (UpgradeSelected shipIdx)
         ]
 
 

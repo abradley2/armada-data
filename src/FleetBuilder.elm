@@ -162,7 +162,7 @@ fleetView model =
             ]
             [ Html.text "Add Ship"
             ]
-        , selectedShipsView model.ships
+        , selectedShipsView model.faction model.ships
         ]
 
 
@@ -197,13 +197,13 @@ selectableShipView ship =
         ]
 
 
-selectedShipsView : List SelectedShip -> Html Msg
+selectedShipsView : Faction -> List SelectedShip -> Html Msg
 selectedShipsView =
-    LazyHtml.lazy selectedShipsView_
+    LazyHtml.lazy2 selectedShipsView_
 
 
-selectedShipsView_ : List SelectedShip -> Html Msg
-selectedShipsView_ ships =
+selectedShipsView_ : Faction -> List SelectedShip -> Html Msg
+selectedShipsView_ faction ships =
     Html.div
         [ Attrs.class "selected-ships"
         ]
@@ -216,16 +216,16 @@ selectedShipsView_ ships =
                 [ Css.fontSize (Css.rem 1)
                 ]
             ]
-            :: List.indexedMap selectedShipView ships
+            :: List.indexedMap (selectedShipView faction) ships
 
 
-selectedShipView : Int -> SelectedShip -> Html Msg
+selectedShipView : Faction -> Int -> SelectedShip -> Html Msg
 selectedShipView =
-    LazyHtml.lazy2 selectedShipView_
+    LazyHtml.lazy3 selectedShipView_
 
 
-selectedShipView_ : Int -> SelectedShip -> Html Msg
-selectedShipView_ shipIdx ship =
+selectedShipView_ : Faction -> Int -> SelectedShip -> Html Msg
+selectedShipView_ faction shipIdx ship =
     Html.div
         []
         [ Html.text ship.shipData.name
@@ -233,26 +233,28 @@ selectedShipView_ shipIdx ship =
             []
           <|
             List.map
-                (upgradeSlotButton shipIdx ship.upgrades)
+                (upgradeSlotButton faction shipIdx ship.upgrades)
                 ship.upgrades
         ]
 
 
 upgradeSlotButton :
-    Int
+    Faction
+    -> Int
     -> List ( UpgradeSlot, Maybe Upgrade )
     -> ( UpgradeSlot, Maybe Upgrade )
     -> Html Msg
 upgradeSlotButton =
-    LazyHtml.lazy3 upgradeSlotButton_
+    LazyHtml.lazy4 upgradeSlotButton_
 
 
 upgradeSlotButton_ :
-    Int
+    Faction
+    -> Int
     -> List ( UpgradeSlot, Maybe Upgrade )
     -> ( UpgradeSlot, Maybe Upgrade )
     -> Html Msg
-upgradeSlotButton_ shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
+upgradeSlotButton_ faction shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
     Html.div
         [ Attrs.class "selected-ships__upgrade-slot-button" ]
         [ case slot of
@@ -297,7 +299,7 @@ upgradeSlotButton_ shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
 
             ShipData.FleetSupport ->
                 Html.text "Fleet Support"
-        , selectableCards selectedShipSlots slot
+        , selectableCards faction selectedShipSlots slot
             |> Html.map (UpgradeSelected shipIdx selectedUpgrade)
         , List.singleton
             >> Html.b []
@@ -313,17 +315,17 @@ upgradeSlotButton_ shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
         ]
 
 
-selectableCards : List ( UpgradeSlot, Maybe Upgrade ) -> UpgradeSlot -> Html Upgrade
+selectableCards : Faction -> List ( UpgradeSlot, Maybe Upgrade ) -> UpgradeSlot -> Html Upgrade
 selectableCards =
-    LazyHtml.lazy2 selectableCards_
+    LazyHtml.lazy3 selectableCards_
 
 
 {-| Given a ships upgrade slots, and a slot to select for, return
 a list of upgrades that can be selected for that slot.
 (some upgrades require multiple slots to be filled, hence the need for allSlots)
 -}
-selectableCards_ : List ( UpgradeSlot, Maybe Upgrade ) -> UpgradeSlot -> Html Upgrade
-selectableCards_ shipSlots slot =
+selectableCards_ : Faction -> List ( UpgradeSlot, Maybe Upgrade ) -> UpgradeSlot -> Html Upgrade
+selectableCards_ faction shipSlots slot =
     let
         availableSlots : List UpgradeSlot
         availableSlots =
@@ -342,6 +344,7 @@ selectableCards_ shipSlots slot =
                         )
             )
             UpgradeCards.allUpgrades
+            |> List.filter (.faction >> Maybe.map ((==) faction) >> Maybe.withDefault False)
             |> List.map
                 (\upgrade ->
                     Html.option

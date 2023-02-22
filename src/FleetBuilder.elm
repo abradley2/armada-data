@@ -112,6 +112,12 @@ init name faction =
     , ships = []
     , mode = ViewFleet
     }
+        |> (\m ->
+                Maybe.map
+                    (ShipSelected >> update >> (|>) m)
+                    (List.head ShipCards.allShips)
+                    |> Maybe.withDefault m
+           )
 
 
 update : Msg -> Model -> Model
@@ -215,6 +221,45 @@ selectedShipsView_ faction ships =
             , Css.Global.class "selected-ships__upgrade-slot-button"
                 [ Css.fontSize (Css.rem 1)
                 ]
+            , Css.Global.class "upgrade-list-container"
+                [ Css.padding (Css.rem 0.5)
+                ]
+            , Css.Global.class "upgrade-list-container__upgrade-list"
+                [ Css.minWidth (Css.rem 20)
+                , Css.maxWidth (Css.rem 32)
+                , Css.displayFlex
+                , Css.flexDirection Css.row
+                , Css.margin (Css.rem -0.5)
+                , Css.boxSizing Css.borderBox
+                , Css.flexWrap Css.wrap
+                ]
+            , Css.Global.class "upgrade-list__grid-item"
+                [ Css.width (Css.calc (Css.pct 50) Css.minus (Css.rem 0.25))
+                , Theme.tabletUp
+                    [ Css.width (Css.calc (Css.pct 33.33) Css.minus (Css.rem 0.25))
+                    ]
+                , Css.margin (Css.rem 0)
+                , Css.padding (Css.rem 0.125)
+                , Css.Global.children
+                    [ Css.Global.button
+                        [ Css.border3 (Css.px 1) Css.solid Theme.softWhite
+                        , Css.padding2 (Css.rem 1) (Css.rem 0.25)
+                        , Css.boxSizing Css.borderBox
+                        , Css.width (Css.pct 100)
+                        , Css.height (Css.pct 100)
+                        , Css.backgroundColor Theme.transparent
+                        , Css.color Theme.softWhite
+                        , Css.cursor Css.pointer
+                        , Css.hover
+                            [ Css.backgroundColor Theme.whiteGlass
+                            ]
+                        , Css.focus
+                            [ Css.backgroundColor Theme.whiteGlass
+                            , Css.outline Css.none
+                            ]
+                        ]
+                    ]
+                ]
             ]
             :: List.indexedMap (selectedShipView faction) ships
 
@@ -301,6 +346,8 @@ upgradeSlotButton_ faction shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
                 Html.text "Fleet Support"
         , selectableCards faction selectedShipSlots slot
             |> Html.map (UpgradeSelected shipIdx selectedUpgrade)
+            |> List.singleton
+            |> Html.div [ Attrs.class "upgrade-list-container" ]
         , List.singleton
             >> Html.b []
             >> List.singleton
@@ -332,8 +379,9 @@ selectableCards_ faction shipSlots slot =
             shipSlots
                 |> List.map Tuple.first
     in
-    Html.select
-        []
+    Html.div
+        [ Attrs.class "upgrade-list-container__upgrade-list"
+        ]
         (List.filter
             (\upgrade ->
                 List.member slot upgrade.slots
@@ -344,13 +392,15 @@ selectableCards_ faction shipSlots slot =
                         )
             )
             UpgradeCards.allUpgrades
-            |> List.filter (.faction >> Maybe.map ((==) faction) >> Maybe.withDefault False)
+            |> List.filter (.faction >> Maybe.map ((==) faction) >> Maybe.withDefault True)
             |> List.map
                 (\upgrade ->
-                    Html.option
-                        [ Events.onClick upgrade
-                        , Attrs.value upgrade.name
+                    Html.div
+                        [ Attrs.class "upgrade-list__grid-item" ]
+                        [ Html.button
+                            [ Events.onClick upgrade
+                            ]
+                            [ Html.text <| upgrade.name ]
                         ]
-                        [ Html.text <| upgrade.name ]
                 )
         )

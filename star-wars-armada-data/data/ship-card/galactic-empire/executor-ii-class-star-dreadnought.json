@@ -1,6 +1,7 @@
 [
   {
     "name": "Executor II-Class Star Dreadnought",
+    "ship": "Star Dreadnought",
     "size": "huge",
     "faction": "Galactic Empire",
     "hull": 33,

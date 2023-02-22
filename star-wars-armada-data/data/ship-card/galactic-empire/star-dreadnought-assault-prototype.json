@@ -1,6 +1,7 @@
 [
   {
     "name": "Star Dreadnought Assault Prototype",
+    "ship": "Star Dreadnought",
     "size": "huge",
     "faction": "Galactic Empire",
     "hull": 22,

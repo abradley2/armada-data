@@ -1,6 +1,7 @@
 [
   {
     "name": "Arquitens-class Command Cruiser",
+    "ship": "Arquitens-class Cruiser",
     "size": "small",
     "faction": "Galactic Empire",
     "hull": 5,

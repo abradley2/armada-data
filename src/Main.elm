@@ -10,7 +10,7 @@ import I18Next exposing (Translations)
 import Language
 import NewFleetForm
 import ShipData exposing (Faction(..))
-import String.Nonempty as NonemptyString
+import String.Nonempty as NonemptyString exposing (NonemptyString(..))
 import Theme
 import Translations
 
@@ -52,6 +52,16 @@ init =
       }
     , EffNone
     )
+        |> (\( m, eff ) ->
+                update
+                    (CreateFleetFormSubmitted
+                        { name = NonemptyString 'A' ""
+                        , faction = GalacticEmpire
+                        }
+                    )
+                    m
+                    |> Tuple.mapSecond (always eff)
+           )
 
 
 update : Msg -> Model -> ( Model, Eff )
@@ -117,14 +127,16 @@ view : Model -> Html Msg
 view model =
     Html.div
         [ Attrs.css
-            [ Css.backgroundColor Theme.softWhite
+            [ Css.backgroundColor Theme.darkGray
+            , Css.color Theme.softWhite
             , Css.height (Css.vh 100)
             , Css.width (Css.vw 100)
+            , Css.overflow Css.auto
             ]
         ]
         [ Html.div
             []
-            [ Html.h3
+            [ Html.div
                 []
                 [ Html.text <|
                     Translations.greeting model.language

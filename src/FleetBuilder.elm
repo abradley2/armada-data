@@ -220,6 +220,23 @@ selectedShipsView_ faction ships =
                 ]
             , Css.Global.class "selected-ships__upgrade-slot-button"
                 [ Css.fontSize (Css.rem 1)
+                , Css.fontWeight Css.normal
+                , Css.displayFlex
+                , Css.alignItems Css.center
+                , Css.color Theme.softWhite
+                , Css.padding (Css.rem 0.5)
+                , Css.backgroundColor Theme.transparent
+                , Css.borderWidth (Css.rem 0)
+                , Css.cursor Css.pointer
+                , Css.hover
+                    [ Css.textDecoration Css.underline
+                    , Css.backgroundColor Theme.whiteGlass
+                    ]
+                , Css.focus
+                    [ Css.textDecoration Css.underline
+                    , Css.backgroundColor Theme.whiteGlass
+                    , Css.outline Css.none
+                    ]
                 ]
             , Css.Global.class "upgrade-list-container"
                 [ Css.padding (Css.rem 0.5)
@@ -237,6 +254,7 @@ selectedShipsView_ faction ships =
                 [ Css.display Css.inlineBlock
                 , Css.width (Css.rem 2.5)
                 , Css.height (Css.rem 2.5)
+                , Css.marginRight (Css.rem 0.5)
                 , Css.cursor Css.pointer
                 , Css.backgroundColor Theme.transparent
                 , Css.borderRadius (Css.pct 100)
@@ -298,7 +316,16 @@ selectedShipView_ faction shipIdx ship =
             []
           <|
             List.map
-                (upgradeSlotButton faction shipIdx ship.upgrades)
+                (\( slotType, upgrade ) ->
+                    Html.div
+                        []
+                        [ upgradeSlotButton faction shipIdx ship.upgrades ( slotType, upgrade )
+                        , selectableCards faction ship.upgrades slotType
+                            |> Html.map (UpgradeSelected shipIdx upgrade)
+                            |> List.singleton
+                            |> Html.div [ Attrs.class "upgrade-list-container" ]
+                        ]
+                )
                 ship.upgrades
         ]
 
@@ -320,108 +347,101 @@ upgradeSlotButton_ :
     -> ( UpgradeSlot, Maybe Upgrade )
     -> Html Msg
 upgradeSlotButton_ faction shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
-    Html.div
+    Html.button
         [ Attrs.class "selected-ships__upgrade-slot-button" ]
-        [ Html.div
-            []
-            [ case slot of
-                ShipData.Officer ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+        [ case slot of
+            ShipData.Officer ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.Title ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.Title ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.SupportTeam ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.SupportTeam ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.OffensiveRetrofit ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.OffensiveRetrofit ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.DefensiveRetrofit ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.DefensiveRetrofit ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.Turbolasers ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.Turbolasers ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.Ordnance ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.Ordnance ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.FleetCommand ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.FleetCommand ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.WeaponsTeam ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.WeaponsTeam ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.IonCannons ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.IonCannons ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.ExperimentalRetrofit ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.ExperimentalRetrofit ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.Superweapon ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.Superweapon ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.Commander ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
+            ShipData.Commander ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
 
-                ShipData.FleetSupport ->
-                    Html.button
-                        [ Attrs.class "upgrade-icon upgrade-icon--commander"
-                        ]
-                        []
-            , List.singleton
-                >> Html.b []
-              <|
-                case selectedUpgrade of
-                    Just upgrade ->
-                        Html.text upgrade.name
+            ShipData.FleetSupport ->
+                Html.span
+                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    ]
+                    []
+        , List.singleton
+            >> Html.b []
+          <|
+            case selectedUpgrade of
+                Just upgrade ->
+                    Html.text upgrade.name
 
-                    Nothing ->
-                        Html.text "None"
-            ]
-        , selectableCards faction selectedShipSlots slot
-            |> Html.map (UpgradeSelected shipIdx selectedUpgrade)
-            |> List.singleton
-            |> Html.div [ Attrs.class "upgrade-list-container" ]
+                Nothing ->
+                    Html.text "None"
         ]
 
 

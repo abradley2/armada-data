@@ -1,4 +1,4 @@
-export class SelectMenu extends HTMLElement {
+class SelectMenu extends HTMLElement {
     constructor() {
         super()
         this.controller = document.querySelector('[aria-controls="' + this.id + '"]')

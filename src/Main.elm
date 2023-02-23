@@ -132,6 +132,8 @@ view model =
             , Css.height (Css.vh 100)
             , Css.width (Css.vw 100)
             , Css.overflow Css.auto
+            , Css.boxSizing Css.borderBox
+            , Css.padding (Css.rem 1)
             ]
         ]
         [ Html.div

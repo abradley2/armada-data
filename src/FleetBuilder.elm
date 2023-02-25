@@ -1,6 +1,5 @@
 module FleetBuilder exposing (..)
 
-import Array
 import Css
 import Css.Global
 import Dict exposing (Dict)
@@ -298,6 +297,9 @@ selectedShipsView_ faction ships =
                     ]
                 , Css.Global.withClass "upgrade-icon--turbolasers"
                     [ Css.backgroundImage (Css.url "/images/turbolasers_upgrade.webp")
+                    ]
+                , Css.Global.withClass "upgrade-icon--weapons-team"
+                    [ Css.backgroundImage (Css.url "/images/weapon_team_upgrade.webp")
                     ]
                 ]
             , Css.Global.class "upgrade-list__grid-item"

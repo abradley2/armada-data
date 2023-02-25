@@ -260,15 +260,44 @@ selectedShipsView_ faction ships =
                 , Css.borderRadius (Css.pct 100)
                 , Css.borderWidth (Css.px 0)
                 , Css.backgroundSize Css.cover
-                , Css.backgroundImage (Css.url "/commander_upgrade.webp")
                 , Css.Global.withClass "upgrade-icon--commander"
-                    [ Css.backgroundImage (Css.url "/commander_upgrade.webp")
+                    [ Css.backgroundImage (Css.url "/images/commander_upgrade.webp")
                     ]
                 , Css.Global.withClass "upgrade-icon--defensive-retrofit"
-                    [ Css.backgroundImage (Css.url "/defensive_retrofit_upgrade.webp")
+                    [ Css.backgroundImage (Css.url "/images/defensive_retrofit_upgrade.webp")
                     ]
                 , Css.Global.withClass "upgrade-icon--experimental-retrofit"
-                    [ Css.backgroundImage (Css.url "/experimental_retrofit_upgrade.webp")
+                    [ Css.backgroundImage (Css.url "/images/experimental_retrofit_upgrade.webp")
+                    ]
+                , Css.Global.withClass "upgrade-icon--fleet-command"
+                    [ Css.backgroundImage (Css.url "/images/fleet_command_upgrade.webp")
+                    ]
+                , Css.Global.withClass "upgrade-icon--ion-cannons"
+                    [ Css.backgroundImage (Css.url "/images/ion_cannons_upgrade.webp")
+                    ]
+                , Css.Global.withClass "upgrade-icon--fleet-support"
+                    [ Css.backgroundImage (Css.url "/images/fleet_support_upgrade.webp")
+                    ]
+                , Css.Global.withClass "upgrade-icon--offensive-retrofit"
+                    [ Css.backgroundImage (Css.url "/images/offensive_retrofit_upgrade.webp")
+                    ]
+                , Css.Global.withClass "upgrade-icon--officer"
+                    [ Css.backgroundImage (Css.url "/images/officer_upgrade.webp")
+                    ]
+                , Css.Global.withClass "upgrade-icon--ordnance-upgrade"
+                    [ Css.backgroundImage (Css.url "/images/ordnance_upgrade.webp")
+                    ]
+                , Css.Global.withClass "upgrade-icon--superweapon-upgrade"
+                    [ Css.backgroundImage (Css.url "/images/superweapon_upgrade.webp")
+                    ]
+                , Css.Global.withClass "upgrade-icon--title"
+                    [ Css.backgroundImage (Css.url "/images/title_upgrade.webp")
+                    ]
+                , Css.Global.withClass "upgrade-icon--support-team"
+                    [ Css.backgroundImage (Css.url "/images/support_team_upgrade.webp")
+                    ]
+                , Css.Global.withClass "upgrade-icon--turbolasers"
+                    [ Css.backgroundImage (Css.url "/images/turbolasers_upgrade.webp")
                     ]
                 ]
             , Css.Global.class "upgrade-list__grid-item"
@@ -348,77 +377,78 @@ upgradeSlotButton_ :
     -> Html Msg
 upgradeSlotButton_ faction shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
     Html.button
-        [ Attrs.class "selected-ships__upgrade-slot-button" ]
+        [ Attrs.class "selected-ships__upgrade-slot-button"
+        ]
         [ case slot of
             ShipData.Officer ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--officer"
                     ]
                     []
 
             ShipData.Title ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--title"
                     ]
                     []
 
             ShipData.SupportTeam ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--support-team"
                     ]
                     []
 
             ShipData.OffensiveRetrofit ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--offensive-retrofit"
                     ]
                     []
 
             ShipData.DefensiveRetrofit ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--defensive-retrofit"
                     ]
                     []
 
             ShipData.Turbolasers ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--turbolasers"
                     ]
                     []
 
             ShipData.Ordnance ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--ordnance"
                     ]
                     []
 
             ShipData.FleetCommand ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--fleet-command"
                     ]
                     []
 
             ShipData.WeaponsTeam ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--weapons-team"
                     ]
                     []
 
             ShipData.IonCannons ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--ion-cannons"
                     ]
                     []
 
             ShipData.ExperimentalRetrofit ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--experimental-retrofit"
                     ]
                     []
 
             ShipData.Superweapon ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--superweapon"
                     ]
                     []
 
@@ -430,7 +460,7 @@ upgradeSlotButton_ faction shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
 
             ShipData.FleetSupport ->
                 Html.span
-                    [ Attrs.class "upgrade-icon upgrade-icon--commander"
+                    [ Attrs.class "upgrade-icon upgrade-icon--fleet-support"
                     ]
                     []
         , List.singleton

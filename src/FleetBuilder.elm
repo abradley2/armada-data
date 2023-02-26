@@ -22,6 +22,7 @@ type alias Model =
     , faction : Faction
     , ships : List SelectedShip
     , mode : Mode
+    , selectingUpgradeFor : Maybe ( Int, UpgradeSlot )
     }
 
 
@@ -102,6 +103,7 @@ type Msg
     = AddShipClicked
     | ShipSelected ShipData
     | UpgradeSelected Int (Maybe Upgrade) Upgrade
+    | UpgradeSlotButtonClicked Int UpgradeSlot
 
 
 init : String -> Faction -> Model
@@ -110,6 +112,7 @@ init name faction =
     , faction = faction
     , ships = []
     , mode = ViewFleet
+    , selectingUpgradeFor = Nothing
     }
         |> (\m ->
                 Maybe.map
@@ -125,6 +128,11 @@ update msg model =
         AddShipClicked ->
             { model | mode = SelectShips }
 
+        UpgradeSlotButtonClicked shipIdx upgradeSlot ->
+            { model
+                | selectingUpgradeFor = Just ( shipIdx, upgradeSlot )
+            }
+
         UpgradeSelected shipIdx previousUpgrade upgrade ->
             model.ships
                 |> List.indexedMap
@@ -139,7 +147,12 @@ update msg model =
                         else
                             ship
                     )
-                |> (\ships -> { model | ships = ships })
+                |> (\ships ->
+                        { model
+                            | ships = ships
+                            , selectingUpgradeFor = Nothing
+                        }
+                   )
 
         ShipSelected shipData ->
             { model
@@ -380,6 +393,7 @@ upgradeSlotButton_ :
 upgradeSlotButton_ faction shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
     Html.button
         [ Attrs.class "selected-ships__upgrade-slot-button"
+        , Events.onClick (UpgradeSlotButtonClicked shipIdx slot)
         ]
         [ case slot of
             ShipData.Officer ->

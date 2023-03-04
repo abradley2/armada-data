@@ -259,18 +259,6 @@ selectedShipsView model =
                     [ Css.padding (Css.rem 0.5)
                     ]
                 ]
-            , Css.Global.class "upgrade-list-container__upgrade-list"
-                [ Css.minWidth (Css.rem 20)
-                , Css.maxWidth (Css.rem 32)
-                , Css.flexDirection Css.row
-                , Css.margin (Css.rem -0.5)
-                , Css.boxSizing Css.borderBox
-                , Css.flexWrap Css.wrap
-                , Css.display Css.none
-                , Css.Global.withClass "upgrade-list-container__upgrade-list--show"
-                    [ Css.displayFlex
-                    ]
-                ]
             , Css.Global.class "upgrade-icon"
                 [ Css.display Css.inlineBlock
                 , Css.width (Css.rem 2.5)
@@ -324,13 +312,27 @@ selectedShipsView model =
                     [ Css.backgroundImage (Css.url "/images/weapon_team_upgrade.webp")
                     ]
                 ]
+            , Css.Global.class "upgrade-list-container__upgrade-list"
+                [ Css.minWidth (Css.rem 24)
+                , Css.maxWidth (Css.rem 36)
+                , Css.flexDirection Css.row
+                , Css.margin (Css.rem -1)
+                , Css.boxSizing Css.borderBox
+                , Css.flexWrap Css.wrap
+                , Css.display Css.none
+                , Css.Global.withClass "upgrade-list-container__upgrade-list--show"
+                    [ Css.displayFlex
+                    , Css.padding2 (Css.rem 1) (Css.rem 0)
+                    ]
+                ]
             , Css.Global.class "upgrade-list__upgrade-grid-item"
-                [ Css.width (Css.calc (Css.pct 50) Css.minus (Css.rem 0.25))
+                [ Css.width (Css.pct 50)
+                , Css.boxSizing Css.borderBox
                 , Theme.tabletUp
-                    [ Css.width (Css.calc (Css.pct 33.33) Css.minus (Css.rem 0.25))
+                    [ Css.width (Css.pct 33.333)
                     ]
                 , Css.margin (Css.rem 0)
-                , Css.padding (Css.rem 0.125)
+                , Css.padding (Css.rem 0.5)
                 , Css.Global.children
                     [ Css.Global.button
                         [ Css.border3 (Css.px 1) Css.solid Theme.softWhite

@@ -346,6 +346,7 @@ selectedShipsView model =
                         , Css.displayFlex
                         , Css.justifyContent Css.spaceBetween
                         , Css.alignItems Css.center
+                        , Css.position Css.relative
                         , Css.hover
                             [ Css.backgroundColor Theme.whiteGlass
                             ]
@@ -360,9 +361,23 @@ selectedShipsView model =
                 [ Css.flex (Css.pct 100)
                 ]
             , Css.Global.class "upgrade-grid-item__upgrade-points"
-                [ Css.minWidth (Css.rem 2)
+                [ Css.minWidth (Css.rem 1.5)
+                , Css.boxSizing Css.contentBox
+                , Css.padding4 (Css.rem 0) (Css.rem 0.75) (Css.rem 0) (Css.rem 0.25)
+                ]
+            , Css.Global.class "upgrade-grid-item__info-icon"
+                [ Css.position Css.absolute
+                , Css.display Css.inlineFlex
+                , Css.alignItems Css.center
+                , Css.justifyContent Css.center
+                , Css.backgroundColor Theme.darkGray
+                , Css.border3 (Css.px 1) Css.solid Theme.softWhite
+                , Css.borderRadius (Css.pct 100)
+                , Css.width (Css.rem 2)
+                , Css.height (Css.rem 2)
+                , Css.top (Css.rem -0.9)
+                , Css.right (Css.rem -0.9)
                 , Css.boxSizing Css.borderBox
-                , Css.padding2 (Css.rem 0) (Css.rem 0.5)
                 ]
             ]
             :: List.indexedMap (selectedShipView faction model.selectingUpgradeFor) ships
@@ -617,6 +632,9 @@ selectableCards_ faction shipIdx upgradeIdx show shipSlots existingUpgrade slot 
                             , Html.span
                                 [ Attrs.class "upgrade-grid-item__upgrade-points" ]
                                 [ Html.text << String.fromInt <| upgrade.points ]
+                            , Html.span
+                                [ Attrs.class "upgrade-grid-item__info-icon" ]
+                                [ Html.text "?" ]
                             ]
                         ]
                 )

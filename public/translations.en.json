@@ -1,6 +1,5 @@
 {
     "lang": "en",
-    "greeting": "Welcome aboard, Admiral",
     "createFleetButton": "Create New Fleet",
     "selectFleetButton": "Select Existing Fleet",
     "newFleetForm": {

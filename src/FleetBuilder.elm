@@ -2,13 +2,14 @@ module FleetBuilder exposing (..)
 
 import Css
 import Css.Global
-import Dict exposing (Dict)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attrs
 import Html.Styled.Events as Events
 import Html.Styled.Lazy as LazyHtml
+import Json.Decode as Decode
 import List.Extra as ListX
 import Maybe.Extra as MaybeX
+import ReCase
 import Set
 import ShipCards
 import ShipData exposing (Faction, ShipData, UpgradeSlot)
@@ -180,7 +181,7 @@ fleetView model =
             ]
             [ Html.text "Add Ship"
             ]
-        , selectedShipsView model.faction model.ships
+        , selectedShipsView model
         ]
 
 
@@ -215,13 +216,15 @@ selectableShipView ship =
         ]
 
 
-selectedShipsView : Faction -> List SelectedShip -> Html Msg
-selectedShipsView =
-    LazyHtml.lazy2 selectedShipsView_
+selectedShipsView : Model -> Html Msg
+selectedShipsView model =
+    let
+        faction =
+            model.faction
 
-
-selectedShipsView_ : Faction -> List SelectedShip -> Html Msg
-selectedShipsView_ faction ships =
+        ships =
+            model.ships
+    in
     Html.div
         [ Attrs.class "selected-ships"
         ]
@@ -234,9 +237,9 @@ selectedShipsView_ faction ships =
                 [ Css.fontSize (Css.rem 1)
                 , Css.fontWeight Css.normal
                 , Css.displayFlex
+                , Css.justifyContent Css.spaceBetween
                 , Css.alignItems Css.center
                 , Css.color Theme.softWhite
-                , Css.padding (Css.rem 0.5)
                 , Css.backgroundColor Theme.transparent
                 , Css.borderWidth (Css.rem 0)
                 , Css.cursor Css.pointer
@@ -251,16 +254,22 @@ selectedShipsView_ faction ships =
                     ]
                 ]
             , Css.Global.class "upgrade-list-container"
-                [ Css.padding (Css.rem 0.5)
+                [ Css.padding (Css.rem 0)
+                , Css.Global.withClass "upgrade-list-container--show"
+                    [ Css.padding (Css.rem 0.5)
+                    ]
                 ]
             , Css.Global.class "upgrade-list-container__upgrade-list"
                 [ Css.minWidth (Css.rem 20)
                 , Css.maxWidth (Css.rem 32)
-                , Css.displayFlex
                 , Css.flexDirection Css.row
                 , Css.margin (Css.rem -0.5)
                 , Css.boxSizing Css.borderBox
                 , Css.flexWrap Css.wrap
+                , Css.display Css.none
+                , Css.Global.withClass "upgrade-list-container__upgrade-list--show"
+                    [ Css.displayFlex
+                    ]
                 ]
             , Css.Global.class "upgrade-icon"
                 [ Css.display Css.inlineBlock
@@ -296,10 +305,10 @@ selectedShipsView_ faction ships =
                 , Css.Global.withClass "upgrade-icon--officer"
                     [ Css.backgroundImage (Css.url "/images/officer_upgrade.webp")
                     ]
-                , Css.Global.withClass "upgrade-icon--ordnance-upgrade"
+                , Css.Global.withClass "upgrade-icon--ordnance"
                     [ Css.backgroundImage (Css.url "/images/ordnance_upgrade.webp")
                     ]
-                , Css.Global.withClass "upgrade-icon--superweapon-upgrade"
+                , Css.Global.withClass "upgrade-icon--superweapon"
                     [ Css.backgroundImage (Css.url "/images/superweapon_upgrade.webp")
                     ]
                 , Css.Global.withClass "upgrade-icon--title"
@@ -315,7 +324,7 @@ selectedShipsView_ faction ships =
                     [ Css.backgroundImage (Css.url "/images/weapon_team_upgrade.webp")
                     ]
                 ]
-            , Css.Global.class "upgrade-list__grid-item"
+            , Css.Global.class "upgrade-list__upgrade-grid-item"
                 [ Css.width (Css.calc (Css.pct 50) Css.minus (Css.rem 0.25))
                 , Theme.tabletUp
                     [ Css.width (Css.calc (Css.pct 33.33) Css.minus (Css.rem 0.25))
@@ -332,6 +341,9 @@ selectedShipsView_ faction ships =
                         , Css.backgroundColor Theme.transparent
                         , Css.color Theme.softWhite
                         , Css.cursor Css.pointer
+                        , Css.displayFlex
+                        , Css.justifyContent Css.spaceBetween
+                        , Css.alignItems Css.center
                         , Css.hover
                             [ Css.backgroundColor Theme.whiteGlass
                             ]
@@ -342,58 +354,93 @@ selectedShipsView_ faction ships =
                         ]
                     ]
                 ]
+            , Css.Global.class "upgrade-grid-item__upgrade-name"
+                [ Css.flex (Css.pct 100)
+                ]
+            , Css.Global.class "upgrade-grid-item__upgrade-points"
+                [ Css.minWidth (Css.rem 2)
+                , Css.boxSizing Css.borderBox
+                , Css.padding2 (Css.rem 0) (Css.rem 0.5)
+                ]
             ]
-            :: List.indexedMap (selectedShipView faction) ships
+            :: List.indexedMap (selectedShipView faction model.selectingUpgradeFor) ships
 
 
-selectedShipView : Faction -> Int -> SelectedShip -> Html Msg
+selectedShipView : Faction -> Maybe ( Int, UpgradeSlot ) -> Int -> SelectedShip -> Html Msg
 selectedShipView =
-    LazyHtml.lazy3 selectedShipView_
+    LazyHtml.lazy4 selectedShipView_
 
 
-selectedShipView_ : Faction -> Int -> SelectedShip -> Html Msg
-selectedShipView_ faction shipIdx ship =
+selectedShipView_ : Faction -> Maybe ( Int, UpgradeSlot ) -> Int -> SelectedShip -> Html Msg
+selectedShipView_ faction selectingUpgradesFor shipIdx ship =
     Html.div
         []
         [ Html.text ship.shipData.name
         , Html.div
             []
           <|
-            List.map
-                (\( slotType, upgrade ) ->
+            List.indexedMap
+                (\upgradeIdx ( slotType, upgrade ) ->
+                    let
+                        show =
+                            selectingUpgradesFor == Just ( shipIdx, slotType )
+                    in
                     Html.div
                         []
-                        [ upgradeSlotButton faction shipIdx ship.upgrades ( slotType, upgrade )
-                        , selectableCards faction ship.upgrades slotType
-                            |> Html.map (UpgradeSelected shipIdx upgrade)
+                        [ upgradeSlotButton
+                            shipIdx
+                            upgradeIdx
+                            ( slotType, upgrade )
+                        , selectableCards faction
+                            shipIdx
+                            upgradeIdx
+                            show
+                            ship.upgrades
+                            upgrade
+                            slotType
                             |> List.singleton
-                            |> Html.div [ Attrs.class "upgrade-list-container" ]
+                            |> Html.div
+                                [ Attrs.classList
+                                    [ ( "upgrade-list-container", True )
+                                    , ( "upgrade-list-container--show", show )
+                                    ]
+                                ]
                         ]
                 )
                 ship.upgrades
         ]
 
 
+upgradeMenuId : Int -> Int -> UpgradeSlot -> String
+upgradeMenuId shipIdx upgradeIdx slot =
+    "ship_"
+        ++ String.fromInt shipIdx
+        ++ "_"
+        ++ String.fromInt upgradeIdx
+        ++ "_"
+        ++ (ReCase.recase ReCase.ToSnake <|
+                ShipData.upgradeSlotToString slot
+           )
+
+
 upgradeSlotButton :
-    Faction
+    Int
     -> Int
-    -> List ( UpgradeSlot, Maybe Upgrade )
     -> ( UpgradeSlot, Maybe Upgrade )
     -> Html Msg
 upgradeSlotButton =
-    LazyHtml.lazy4 upgradeSlotButton_
+    LazyHtml.lazy3 upgradeSlotButton_
 
 
 upgradeSlotButton_ :
-    Faction
+    Int
     -> Int
-    -> List ( UpgradeSlot, Maybe Upgrade )
     -> ( UpgradeSlot, Maybe Upgrade )
     -> Html Msg
-upgradeSlotButton_ faction shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
+upgradeSlotButton_ shipIdx upgradeIdx ( slot, selectedUpgrade ) =
     Html.button
         [ Attrs.class "selected-ships__upgrade-slot-button"
-        , Events.onClick (UpgradeSlotButtonClicked shipIdx slot)
+        , Attrs.attribute "aria-controls" (upgradeMenuId shipIdx upgradeIdx slot)
         ]
         [ case slot of
             ShipData.Officer ->
@@ -491,25 +538,57 @@ upgradeSlotButton_ faction shipIdx selectedShipSlots ( slot, selectedUpgrade ) =
         ]
 
 
-selectableCards : Faction -> List ( UpgradeSlot, Maybe Upgrade ) -> UpgradeSlot -> Html Upgrade
+selectableCards :
+    Faction
+    -> Int
+    -> Int
+    -> Bool
+    -> List ( UpgradeSlot, Maybe Upgrade )
+    -> Maybe Upgrade
+    -> UpgradeSlot
+    -> Html Msg
 selectableCards =
-    LazyHtml.lazy3 selectableCards_
+    LazyHtml.lazy7 selectableCards_
 
 
 {-| Given a ships upgrade slots, and a slot to select for, return
 a list of upgrades that can be selected for that slot.
 (some upgrades require multiple slots to be filled, hence the need for allSlots)
 -}
-selectableCards_ : Faction -> List ( UpgradeSlot, Maybe Upgrade ) -> UpgradeSlot -> Html Upgrade
-selectableCards_ faction shipSlots slot =
+selectableCards_ :
+    Faction
+    -> Int
+    -> Int
+    -> Bool
+    -> List ( UpgradeSlot, Maybe Upgrade )
+    -> Maybe Upgrade
+    -> UpgradeSlot
+    -> Html Msg
+selectableCards_ faction shipIdx upgradeIdx show shipSlots existingUpgrade slot =
     let
         availableSlots : List UpgradeSlot
         availableSlots =
             shipSlots
                 |> List.map Tuple.first
     in
-    Html.div
-        [ Attrs.class "upgrade-list-container__upgrade-list"
+    Html.node
+        "select-menu"
+        [ Attrs.classList
+            [ ( "upgrade-list-container__upgrade-list", True )
+            , ( "upgrade-list-container__upgrade-list--show", show )
+            ]
+        , Attrs.id <| upgradeMenuId shipIdx upgradeIdx slot
+        , Attrs.attribute "show"
+            (if show then
+                "true"
+
+             else
+                "false"
+            )
+        , Events.on "requestedopen"
+            (Decode.succeed
+                (UpgradeSlotButtonClicked shipIdx slot)
+            )
         ]
         (List.filter
             (\upgrade ->
@@ -525,11 +604,18 @@ selectableCards_ faction shipSlots slot =
             |> List.map
                 (\upgrade ->
                     Html.div
-                        [ Attrs.class "upgrade-list__grid-item" ]
+                        [ Attrs.class "upgrade-list__upgrade-grid-item" ]
                         [ Html.button
-                            [ Events.onClick upgrade
+                            [ Events.onClick (UpgradeSelected shipIdx existingUpgrade upgrade)
                             ]
-                            [ Html.text <| upgrade.name ]
+                            [ Html.span
+                                [ Attrs.class "upgrade-grid-item__upgrade-name"
+                                ]
+                                [ Html.text <| upgrade.name ]
+                            , Html.span
+                                [ Attrs.class "upgrade-grid-item__upgrade-points" ]
+                                [ Html.text << String.fromInt <| upgrade.points ]
+                            ]
                         ]
                 )
         )

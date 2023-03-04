@@ -136,15 +136,7 @@ view model =
             , Css.padding (Css.rem 1)
             ]
         ]
-        [ Html.div
-            []
-            [ Html.div
-                []
-                [ Html.text <|
-                    Translations.greeting model.language
-                ]
-            ]
-        , case model.form of
+        [ case model.form of
             Just (NewFleetForm form) ->
                 NewFleetForm.view model.language form
                     |> Html.map NewFleetFormMsg

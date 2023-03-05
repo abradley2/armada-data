@@ -175,7 +175,9 @@ view model =
 fleetView : Model -> Html Msg
 fleetView model =
     Html.div
-        []
+        [ Attrs.css
+            []
+        ]
         [ Html.button
             [ Events.onClick AddShipClicked
             ]
@@ -229,9 +231,30 @@ selectedShipsView model =
         [ Attrs.class "selected-ships"
         ]
     <|
+        stylesheet ()
+            :: List.indexedMap (selectedShipView faction model.selectingUpgradeFor) ships
+
+
+stylesheet : () -> Html msg
+stylesheet =
+    LazyHtml.lazy stylesheet_
+
+
+stylesheet_ : () -> Html msg
+stylesheet_ =
+    always <|
         Css.Global.global
-            [ Css.Global.class "selected-ships"
-                [ Css.fontSize (Css.rem 2)
+            [ Css.Global.class "selected-ship-title"
+                [ Css.fontSize (Css.rem 1.25)
+                , Css.fontWeight Css.bold
+                , Css.Global.descendants
+                    [ Css.Global.class "selected-ship-title__points"
+                        [ Css.fontSize (Css.rem 0.8)
+                        , Css.fontWeight Css.normal
+                        , Css.paddingLeft (Css.rem 0.25)
+                        , Css.display Css.inlineBlock
+                        ]
+                    ]
                 ]
             , Css.Global.class "selected-ships__upgrade-slot-button"
                 [ Css.fontSize (Css.rem 1)
@@ -252,6 +275,12 @@ selectedShipsView model =
                     , Css.backgroundColor Theme.whiteGlass
                     , Css.outline Css.none
                     ]
+                ]
+            , Css.Global.class "upgrade-slot-button__points"
+                [ Css.fontSize (Css.rem 0.8)
+                , Css.fontWeight Css.normal
+                , Css.paddingLeft (Css.rem 0.25)
+                , Css.display Css.inlineBlock
                 ]
             , Css.Global.class "upgrade-list-container"
                 [ Css.padding (Css.rem 0)
@@ -314,7 +343,7 @@ selectedShipsView model =
                 ]
             , Css.Global.class "upgrade-list-container__upgrade-list"
                 [ Css.minWidth (Css.rem 24)
-                , Css.maxWidth (Css.rem 36)
+                , Css.maxWidth (Css.rem 48)
                 , Css.flexDirection Css.row
                 , Css.margin (Css.rem -1)
                 , Css.boxSizing Css.borderBox
@@ -380,7 +409,6 @@ selectedShipsView model =
                 , Css.boxSizing Css.borderBox
                 ]
             ]
-            :: List.indexedMap (selectedShipView faction model.selectingUpgradeFor) ships
 
 
 selectedShipView : Faction -> Maybe ( Int, UpgradeSlot ) -> Int -> SelectedShip -> Html Msg
@@ -392,7 +420,16 @@ selectedShipView_ : Faction -> Maybe ( Int, UpgradeSlot ) -> Int -> SelectedShip
 selectedShipView_ faction selectingUpgradesFor shipIdx ship =
     Html.div
         []
-        [ Html.text ship.shipData.name
+        [ Html.div
+            [ Attrs.class "selected-ship-title"
+            ]
+            [ Html.text ship.shipData.name
+            , Html.span
+                [ Attrs.class "selected-ship-title__points"
+                ]
+                [ Html.text <| "(" ++ String.fromInt ship.shipData.points ++ ")"
+                ]
+            ]
         , Html.div
             []
           <|
@@ -548,7 +585,13 @@ upgradeSlotButton_ shipIdx upgradeIdx ( slot, selectedUpgrade ) =
           <|
             case selectedUpgrade of
                 Just upgrade ->
-                    Html.text upgrade.name
+                    Html.span
+                        []
+                        [ Html.text upgrade.name
+                        , Html.span
+                            [ Attrs.class "upgrade-slot-button__points" ]
+                            [ Html.text <| "(" ++ String.fromInt upgrade.points ++ ")" ]
+                        ]
 
                 Nothing ->
                     Html.text "None"

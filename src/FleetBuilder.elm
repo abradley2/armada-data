@@ -453,7 +453,34 @@ selectedShipView_ faction selectingUpgradesFor shipIdx ship =
                     Html.text ""
                 ]
             ]
-        , Html.div
+        , let
+            ( emptyUpgradeSlots, filledUpgradeSlots ) =
+                ListX.indexedFoldl
+                    (\idx ( slotType, upgrade ) ( emptySlots, filledSlots ) ->
+                        Maybe.map
+                            (always <|
+                                ( emptySlots
+                                , ( idx
+                                  , slotType
+                                  , upgrade
+                                  )
+                                    :: filledSlots
+                                )
+                            )
+                            upgrade
+                            |> Maybe.withDefault
+                                ( ( idx
+                                  , slotType
+                                  , upgrade
+                                  )
+                                    :: emptySlots
+                                , filledSlots
+                                )
+                    )
+                    ( [], [] )
+                    ship.upgrades
+          in
+          Html.div
             []
           <|
             List.indexedMap

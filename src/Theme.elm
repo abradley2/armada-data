@@ -19,6 +19,11 @@ darkGray =
     Css.rgb 50 50 50
 
 
+turquoiseBlue : Color
+turquoiseBlue =
+    Css.rgb 0 200 200
+
+
 transparent : Color
 transparent =
     Css.rgba 0 0 0 0

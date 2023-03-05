@@ -95,6 +95,18 @@ selectShip shipData =
     }
 
 
+selectedShipPoints : SelectedShip -> Int
+selectedShipPoints ship =
+    ship.shipData.points
+        + List.foldr
+            (\( _, upgrade ) total ->
+                Maybe.map (.points >> (+) total) upgrade
+                    |> Maybe.withDefault total
+            )
+            0
+            ship.upgrades
+
+
 type Mode
     = ViewFleet
     | SelectShips
@@ -253,6 +265,7 @@ stylesheet_ =
                         , Css.fontWeight Css.normal
                         , Css.paddingLeft (Css.rem 0.25)
                         , Css.display Css.inlineBlock
+                        , Css.color Theme.turquoiseBlue
                         ]
                     ]
                 ]
@@ -281,6 +294,7 @@ stylesheet_ =
                 , Css.fontWeight Css.normal
                 , Css.paddingLeft (Css.rem 0.25)
                 , Css.display Css.inlineBlock
+                , Css.color Theme.turquoiseBlue
                 ]
             , Css.Global.class "upgrade-list-container"
                 [ Css.padding (Css.rem 0)
@@ -424,10 +438,19 @@ selectedShipView_ faction selectingUpgradesFor shipIdx ship =
             [ Attrs.class "selected-ship-title"
             ]
             [ Html.text ship.shipData.name
-            , Html.span
+            , let
+                points =
+                    selectedShipPoints ship
+              in
+              Html.span
                 [ Attrs.class "selected-ship-title__points"
                 ]
-                [ Html.text <| "(" ++ String.fromInt ship.shipData.points ++ ")"
+                [ Html.text <| String.fromInt ship.shipData.points
+                , if points /= ship.shipData.points then
+                    Html.b [] << List.singleton << Html.text <| " (" ++ String.fromInt points ++ ")"
+
+                  else
+                    Html.text ""
                 ]
             ]
         , Html.div
@@ -590,7 +613,7 @@ upgradeSlotButton_ shipIdx upgradeIdx ( slot, selectedUpgrade ) =
                         [ Html.text upgrade.name
                         , Html.span
                             [ Attrs.class "upgrade-slot-button__points" ]
-                            [ Html.text <| "(" ++ String.fromInt upgrade.points ++ ")" ]
+                            [ Html.text <| String.fromInt upgrade.points ]
                         ]
 
                 Nothing ->

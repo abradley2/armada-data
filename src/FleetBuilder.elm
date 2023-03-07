@@ -23,7 +23,7 @@ type alias Model =
     , faction : Faction
     , ships : List SelectedShip
     , mode : Mode
-    , selectingUpgradeFor : Maybe ( Int, UpgradeSlot )
+    , selectingUpgradeFor : Maybe ( Int, Int, UpgradeSlot )
     }
 
 
@@ -116,7 +116,7 @@ type Msg
     = AddShipClicked
     | ShipSelected ShipData
     | UpgradeSelected Int (Maybe Upgrade) Upgrade
-    | UpgradeSlotButtonClicked Int UpgradeSlot
+    | UpgradeSlotButtonClicked Int Int UpgradeSlot
 
 
 init : String -> Faction -> Model
@@ -139,11 +139,14 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         AddShipClicked ->
-            { model | mode = SelectShips }
-
-        UpgradeSlotButtonClicked shipIdx upgradeSlot ->
             { model
-                | selectingUpgradeFor = Just ( shipIdx, upgradeSlot )
+                | mode = SelectShips
+                , selectingUpgradeFor = Nothing
+            }
+
+        UpgradeSlotButtonClicked shipIdx upgradeIdx upgradeSlot ->
+            { model
+                | selectingUpgradeFor = Just ( shipIdx, upgradeIdx, upgradeSlot )
             }
 
         UpgradeSelected shipIdx previousUpgrade upgrade ->
@@ -188,7 +191,9 @@ fleetView : Model -> Html Msg
 fleetView model =
     Html.div
         [ Attrs.css
-            []
+            [ Css.maxWidth (Css.rem 48)
+            , Css.margin Css.auto
+            ]
         ]
         [ Html.button
             [ Events.onClick AddShipClicked
@@ -288,6 +293,9 @@ stylesheet_ =
                     , Css.backgroundColor Theme.whiteGlass
                     , Css.outline Css.none
                     ]
+                , Css.Global.withClass "selected-ships__upgrade-slot-button--empty"
+                    [ Css.opacity (Css.num 0.6)
+                    ]
                 ]
             , Css.Global.class "upgrade-slot-button__points"
                 [ Css.fontSize (Css.rem 0.8)
@@ -368,6 +376,17 @@ stylesheet_ =
                     , Css.padding2 (Css.rem 1) (Css.rem 0)
                     ]
                 ]
+            , Css.Global.class "selected-ship"
+                [ Css.pseudoClass "not(:first-child)" [ Css.marginTop (Css.rem 1) ]
+                ]
+            , Css.Global.class "selected-ship__filled-upgrade-buttons"
+                [ Css.displayFlex
+                , Css.flexDirection Css.column
+                ]
+            , Css.Global.class "selected-ship__empty-upgrade-buttons"
+                [ Css.displayFlex
+                , Css.flexWrap Css.wrap
+                ]
             , Css.Global.class "upgrade-list__upgrade-grid-item"
                 [ Css.width (Css.pct 50)
                 , Css.boxSizing Css.borderBox
@@ -425,15 +444,44 @@ stylesheet_ =
             ]
 
 
-selectedShipView : Faction -> Maybe ( Int, UpgradeSlot ) -> Int -> SelectedShip -> Html Msg
+selectedShipView : Faction -> Maybe ( Int, Int, UpgradeSlot ) -> Int -> SelectedShip -> Html Msg
 selectedShipView =
     LazyHtml.lazy4 selectedShipView_
 
 
-selectedShipView_ : Faction -> Maybe ( Int, UpgradeSlot ) -> Int -> SelectedShip -> Html Msg
+selectedShipView_ : Faction -> Maybe ( Int, Int, UpgradeSlot ) -> Int -> SelectedShip -> Html Msg
 selectedShipView_ faction selectingUpgradesFor shipIdx ship =
+    let
+        ( emptyUpgradeSlots, filledUpgradeSlots ) =
+            ListX.indexedFoldl
+                (\idx ( slotType, upgrade ) ( emptySlots, filledSlots ) ->
+                    Maybe.map
+                        (always <|
+                            ( emptySlots
+                            , ( idx
+                              , slotType
+                              , upgrade
+                              )
+                                :: filledSlots
+                            )
+                        )
+                        upgrade
+                        |> Maybe.withDefault
+                            ( ( idx
+                              , slotType
+                              , upgrade
+                              )
+                                :: emptySlots
+                            , filledSlots
+                            )
+                )
+                ( [], [] )
+                ship.upgrades
+                |> Tuple.mapBoth List.reverse List.reverse
+    in
     Html.div
-        []
+        [ Attrs.class "selected-ship"
+        ]
         [ Html.div
             [ Attrs.class "selected-ship-title"
             ]
@@ -453,65 +501,58 @@ selectedShipView_ faction selectingUpgradesFor shipIdx ship =
                     Html.text ""
                 ]
             ]
-        , let
-            ( emptyUpgradeSlots, filledUpgradeSlots ) =
-                ListX.indexedFoldl
-                    (\idx ( slotType, upgrade ) ( emptySlots, filledSlots ) ->
-                        Maybe.map
-                            (always <|
-                                ( emptySlots
-                                , ( idx
-                                  , slotType
-                                  , upgrade
-                                  )
-                                    :: filledSlots
-                                )
-                            )
-                            upgrade
-                            |> Maybe.withDefault
-                                ( ( idx
-                                  , slotType
-                                  , upgrade
-                                  )
-                                    :: emptySlots
-                                , filledSlots
-                                )
-                    )
-                    ( [], [] )
-                    ship.upgrades
-          in
-          Html.div
+        , Html.div
+            [ Attrs.class "selected-ship__empty-upgrade-buttons"
+            ]
+          <|
+            List.map
+                (\( upgradeIdx, slotType, upgrade ) ->
+                    upgradeSlotButton
+                        shipIdx
+                        upgradeIdx
+                        ( slotType, upgrade )
+                )
+                emptyUpgradeSlots
+        , Html.div
             []
           <|
-            List.indexedMap
-                (\upgradeIdx ( slotType, upgrade ) ->
+            List.map
+                (\( upgradeIdx, slotType, upgrade ) ->
                     let
                         show =
-                            selectingUpgradesFor == Just ( shipIdx, slotType )
+                            selectingUpgradesFor == Just ( shipIdx, upgradeIdx, slotType )
                     in
+                    selectableCards faction
+                        shipIdx
+                        upgradeIdx
+                        show
+                        ship.upgrades
+                        upgrade
+                        slotType
+                        |> List.singleton
+                        |> Html.div
+                            [ Attrs.classList
+                                [ ( "upgrade-list-container", True )
+                                , ( "upgrade-list-container--show", show )
+                                ]
+                            ]
+                )
+                (emptyUpgradeSlots ++ filledUpgradeSlots)
+        , Html.div
+            [ Attrs.class "selected-ship__filled-upgrade-buttons"
+            ]
+          <|
+            List.map
+                (\( upgradeIdx, slotType, upgrade ) ->
                     Html.div
                         []
                         [ upgradeSlotButton
                             shipIdx
                             upgradeIdx
                             ( slotType, upgrade )
-                        , selectableCards faction
-                            shipIdx
-                            upgradeIdx
-                            show
-                            ship.upgrades
-                            upgrade
-                            slotType
-                            |> List.singleton
-                            |> Html.div
-                                [ Attrs.classList
-                                    [ ( "upgrade-list-container", True )
-                                    , ( "upgrade-list-container--show", show )
-                                    ]
-                                ]
                         ]
                 )
-                ship.upgrades
+                filledUpgradeSlots
         ]
 
 
@@ -543,7 +584,10 @@ upgradeSlotButton_ :
     -> Html Msg
 upgradeSlotButton_ shipIdx upgradeIdx ( slot, selectedUpgrade ) =
     Html.button
-        [ Attrs.class "selected-ships__upgrade-slot-button"
+        [ Attrs.classList
+            [ ( "selected-ships__upgrade-slot-button", True )
+            , ( "selected-ships__upgrade-slot-button--empty", selectedUpgrade == Nothing )
+            ]
         , Attrs.attribute "aria-controls" (upgradeMenuId shipIdx upgradeIdx slot)
         ]
         [ case slot of
@@ -644,7 +688,7 @@ upgradeSlotButton_ shipIdx upgradeIdx ( slot, selectedUpgrade ) =
                         ]
 
                 Nothing ->
-                    Html.text "None"
+                    Html.text ""
         ]
 
 
@@ -697,7 +741,7 @@ selectableCards_ faction shipIdx upgradeIdx show shipSlots existingUpgrade slot 
             )
         , Events.on "requestedopen"
             (Decode.succeed
-                (UpgradeSlotButtonClicked shipIdx slot)
+                (UpgradeSlotButtonClicked shipIdx upgradeIdx slot)
             )
         ]
         (List.filter

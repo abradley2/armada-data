@@ -1,4 +1,4 @@
-module FleetBuilder exposing (..)
+module FleetBuilder exposing (Mode(..), Model, Msg(..), SelectedShip, init, selectShip, selectUpgrade, update, view)
 
 import Css
 import Css.Global
@@ -238,9 +238,11 @@ selectableShipView ship =
 selectedShipsView : Model -> Html Msg
 selectedShipsView model =
     let
+        faction : Faction
         faction =
             model.faction
 
+        ships : List SelectedShip
         ships =
             model.ships
     in
@@ -487,6 +489,7 @@ selectedShipView_ faction selectingUpgradesFor shipIdx ship =
             ]
             [ Html.text ship.shipData.name
             , let
+                points : Int
                 points =
                     selectedShipPoints ship
               in
@@ -519,6 +522,7 @@ selectedShipView_ faction selectingUpgradesFor shipIdx ship =
             List.map
                 (\( upgradeIdx, slotType, upgrade ) ->
                     let
+                        show : Bool
                         show =
                             selectingUpgradesFor == Just ( shipIdx, upgradeIdx, slotType )
                     in

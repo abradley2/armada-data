@@ -7,7 +7,8 @@
         "emptyNameError": "Fleet name cannot be empty",
         "factionLabel": "Faction",
         "factionRequiredError": "You must select a faction",
-        "createButtonLabel": "Create"
+        "createButtonLabel": "Create",
+        "factionSelectPlaceholder": "Select a faction"
     },
     "factions": {
         "galacticEmpire": "Galactic Empire",

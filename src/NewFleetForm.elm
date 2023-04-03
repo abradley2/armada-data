@@ -1,4 +1,4 @@
-module NewFleetForm exposing (..)
+module NewFleetForm exposing (Model, Msg(..), ValidModel, init, update, view)
 
 import Css
 import Html.Styled as Html exposing (Html)
@@ -8,7 +8,7 @@ import I18Next exposing (Translations)
 import Json.Decode as Decode
 import ShipData exposing (Faction(..))
 import String.Nonempty as NonemptyString exposing (NonemptyString)
-import Translations.Factions as Translations
+import Translations.Factions
 import Translations.NewFleetForm as Translations
 import Verify.Form exposing (FieldValidator, FormValidator)
 
@@ -147,10 +147,10 @@ view language model =
                     (Decode.at [ "target", "value" ] Decode.string
                         |> Decode.andThen
                             (\val ->
-                                if val == Translations.galacticEmpire language then
+                                if val == Translations.Factions.galacticEmpire language then
                                     Decode.succeed (FactionSelected GalacticEmpire)
 
-                                else if val == Translations.rebelAlliance language then
+                                else if val == Translations.Factions.rebelAlliance language then
                                     Decode.succeed (FactionSelected RebelAlliance)
 
                                 else
@@ -158,19 +158,20 @@ view language model =
                             )
                     )
                 ]
-                [ Html.option 
+                [ Html.option
                     []
-                    [ Html.text "Select a Faction" 
+                    [ Html.text <|
+                        Translations.factionSelectPlaceholder language
                     ]
                 , Html.option
                     []
                     [ Html.text <|
-                        Translations.galacticEmpire language
+                        Translations.Factions.galacticEmpire language
                     ]
                 , Html.option
                     []
                     [ Html.text <|
-                        Translations.rebelAlliance language
+                        Translations.Factions.rebelAlliance language
                     ]
                 ]
             , Html.br [] []

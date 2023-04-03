@@ -1,4 +1,4 @@
-module Main exposing (Eff(..), Model, Msg(..), main)
+module Main exposing (Eff(..), Form, Model, Msg(..), main)
 
 import Browser
 import Css
@@ -38,8 +38,7 @@ perform effect =
 
 
 type Msg
-    = SelectFleetClicked FleetBuilder.Model
-    | CreateFleetClicked
+    = CreateFleetClicked
     | CreateFleetFormSubmitted NewFleetForm.ValidModel
     | NewFleetFormMsg NewFleetForm.Msg
     | FleetBuilderMsg FleetBuilder.Msg
@@ -71,6 +70,7 @@ update msg model =
             case model.form of
                 Just (FleetBuilder form) ->
                     let
+                        nextForm : FleetBuilder.Model
                         nextForm =
                             FleetBuilder.update subMsg form
                     in
@@ -105,9 +105,6 @@ update msg model =
 
                 _ ->
                     ( model, EffNone )
-
-        SelectFleetClicked fleetBuilderModel ->
-            ( { model | form = Just <| FleetBuilder fleetBuilderModel }, EffNone )
 
         CreateFleetFormSubmitted form ->
             ( { model

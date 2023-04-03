@@ -1,4 +1,4 @@
-module Theme exposing (..)
+module Theme exposing (darkGray, softWhite, tabletUp, transparent, turquoiseBlue, whiteGlass)
 
 import Css exposing (Color, Style)
 import Css.Media as Media
